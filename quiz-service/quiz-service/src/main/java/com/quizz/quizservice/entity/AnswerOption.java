@@ -1,6 +1,7 @@
 package com.quizz.quizservice.entity;
 
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jdk.jfr.Name;
 import lombok.*;
@@ -20,6 +21,7 @@ public class AnswerOption {
     private boolean correct;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name="question_id")
     private Question question;
 }

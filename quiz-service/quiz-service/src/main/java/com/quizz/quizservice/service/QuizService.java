@@ -18,6 +18,8 @@ public class QuizService {
     private final QuizRepository quizRepository;
 
     public Quiz createQuiz(CreateQuizRequest request) {
+
+        //create quiz object
         Quiz quiz = Quiz.builder()
                 .title(request.getTitle())
                 .category(request.getCategory())

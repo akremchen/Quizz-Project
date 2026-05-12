@@ -1,5 +1,6 @@
 package com.quizz.quizservice.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotBlank;
 import lombok.*;
@@ -21,6 +22,7 @@ public class Question {
     private String question;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "quiz_id")
     private Quiz quiz;
 
