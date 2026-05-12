@@ -8,13 +8,13 @@ import com.quizz.quizservice.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-
-import static java.util.stream.Collectors.toList;
 
 @Service
 @RequiredArgsConstructor
 public class QuizService {
+
     private final QuizRepository quizRepository;
 
     public Quiz createQuiz(CreateQuizRequest request) {
@@ -23,20 +23,31 @@ public class QuizService {
                 .category(request.getCategory())
                 .description(request.getDescription())
                 .published(false)
+                .createdAt(LocalDateTime.now())
                 .build();
+
         List<Question> questions = request.getQuestions().stream()
                 .map(questionRequest -> {
                     Question question = Question.builder()
                             .question(questionRequest.getQuestion())
                             .quiz(quiz)
                             .build();
-                    List<AnswerOption> options = questionRequest.getOptions().stream()
+
+                    List<AnswerOption> answers = questionRequest.getOptions().stream()
                             .map(optionRequest -> AnswerOption.builder()
                                     .answer(optionRequest.getAnswer())
                                     .correct(optionRequest.isCorrect())
-                                    .question(question))
+                                    .question(question)
+                                    .build())
+                            .toList();
 
+                    question.setAnswers(answers);
+
+                    return question;
                 })
+                .toList();
+
+        quiz.setQuestions(questions);
 
         return quizRepository.save(quiz);
     }

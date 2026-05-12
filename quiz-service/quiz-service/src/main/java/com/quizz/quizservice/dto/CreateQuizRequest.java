@@ -13,7 +13,9 @@ public class CreateQuizRequest {
 
     @NotBlank
     private String title;
+
     private String description;
+
     @NotBlank
     private String category;
 
@@ -25,7 +27,9 @@ public class CreateQuizRequest {
     public static class QuestionRequest {
         @NotBlank
         private String question;
-        private boolean correct;
+
+        @NotEmpty
+        private List<AnswerRequest> options;
     }
 
     @Getter
