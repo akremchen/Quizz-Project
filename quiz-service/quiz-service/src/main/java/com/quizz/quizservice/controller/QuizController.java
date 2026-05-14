@@ -2,10 +2,12 @@ package com.quizz.quizservice.controller;
 
 
 import com.quizz.quizservice.dto.CreateQuizRequest;
+import com.quizz.quizservice.dto.SubmitQuizRequest;
+import com.quizz.quizservice.dto.response.QuizResponse;
+import com.quizz.quizservice.dto.response.QuizResultResponse;
 import com.quizz.quizservice.entity.Quiz;
 import com.quizz.quizservice.service.QuizService;
 import jakarta.validation.Valid;
-import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +24,25 @@ public class QuizController {
         return quizService.createQuiz(request);
     }
     @GetMapping
-    public List<Quiz> findAllQuizzes() {
+    public List<QuizResponse> findAllQuizzes() {
         return quizService.findAllQuizzes();
     }
 
+    @GetMapping("/{id}")
+    public QuizResponse findQuizById(@PathVariable Long id) {
+        return quizService.findQuizById(id);
+    }
+
+    @PatchMapping("/{id}/publish")
+    public QuizResponse publishQuiz(@PathVariable Long id) {
+        return quizService.publishQuiz(id);
+    }
+
+    @PostMapping("/{id}/submit")
+    public QuizResultResponse submitQuiz(
+        @PathVariable Long id,
+        @RequestBody SubmitQuizRequest request)
+    {
+        return quizService.submitQuiz(id, request);
+    }
 }
