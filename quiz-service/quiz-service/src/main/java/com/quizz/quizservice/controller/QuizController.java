@@ -6,6 +6,7 @@ import com.quizz.quizservice.dto.SubmitQuizRequest;
 import com.quizz.quizservice.dto.response.QuizResponse;
 import com.quizz.quizservice.dto.response.QuizResultResponse;
 import com.quizz.quizservice.entity.Quiz;
+import com.quizz.quizservice.entity.QuizAttempt;
 import com.quizz.quizservice.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -41,8 +42,13 @@ public class QuizController {
     @PostMapping("/{id}/submit")
     public QuizResultResponse submitQuiz(
         @PathVariable Long id,
-        @RequestBody SubmitQuizRequest request)
+        @Valid @RequestBody SubmitQuizRequest request)
     {
         return quizService.submitQuiz(id, request);
+    }
+
+    @GetMapping("/users/{userId}/attempts")
+    public List<QuizAttempt> getAttemptsByUserId(@PathVariable Long userId) {
+        return quizService.getAttemptsByUserId(userId);
     }
 }

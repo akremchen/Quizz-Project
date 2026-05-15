@@ -9,6 +9,10 @@ import com.quizz.quizservice.dto.response.QuizResultResponse;
 import com.quizz.quizservice.entity.AnswerOption;
 import com.quizz.quizservice.entity.Question;
 import com.quizz.quizservice.entity.Quiz;
+import com.quizz.quizservice.entity.QuizAttempt;
+import com.quizz.quizservice.exception.BadRequestException;
+import com.quizz.quizservice.exception.ResourceNotFoundException;
+import com.quizz.quizservice.repository.QuizAttemptRepository;
 import com.quizz.quizservice.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +25,7 @@ import java.util.List;
 public class QuizService {
 
     private final QuizRepository quizRepository;
+    private final QuizAttemptRepository quizAttemptRepository;
 
     public Quiz createQuiz(CreateQuizRequest request) {
 
@@ -96,12 +101,12 @@ public class QuizService {
 
     public QuizResponse findQuizById(Long id) {
 
-        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new RuntimeException("No Quiz found with id " + id));
+        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No Quiz found with id " + id));
         return mapToQuizResponse(quiz);
     }
 
     public QuizResponse publishQuiz(Long id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new RuntimeException("No Quiz found with id " + id));
+        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No Quiz found with id " + id));
         quiz.setPublished(true);
         Quiz savedQuiz = quizRepository.save(quiz);
         return mapToQuizResponse(savedQuiz);
@@ -109,7 +114,12 @@ public class QuizService {
 
     public QuizResultResponse submitQuiz(Long quizId, SubmitQuizRequest request) {
 
-        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() -> new RuntimeException("Quiz not found"));
+        Quiz quiz = quizRepository.findById(quizId).orElseThrow(() ->
+                new ResourceNotFoundException("Quiz not found"));
+
+        if (!Boolean.TRUE.equals(quiz.getPublished())) {
+            throw new BadRequestException("Quiz must be published before it can be submitted");
+        }
 
         int correctAnswers = 0;
 
@@ -118,7 +128,8 @@ public class QuizService {
             Question question = quiz.getQuestions().stream()
                     .filter(q -> q.getId().equals(submittedAnswer.getQuestionId()))
                     .findFirst()
-                    .orElseThrow(() -> new RuntimeException("Question not found"));
+                    .orElseThrow(() ->
+                            new BadRequestException("Question does not belong to this quiz: " + submittedAnswer.getQuestionId()));
 
             boolean isCorrect = question.getAnswers().stream()
                     .anyMatch(answer -> answer.getId().equals(submittedAnswer.getSelectedOptionId())
@@ -129,6 +140,17 @@ public class QuizService {
             }
         }
 
+        QuizAttempt attempt = QuizAttempt.builder()
+                .quizId(quizId)
+                .userId(request.getUserId())
+                .score(correctAnswers)
+                .totalQuestions(quiz.getQuestions().size())
+                .correctAnswers(correctAnswers)
+                .submittedAt(LocalDateTime.now())
+                .build();
+
+        quizAttemptRepository.save(attempt);
+
         return QuizResultResponse.builder()
                 .quizId(quizId)
                 .userId(request.getUserId())
@@ -136,5 +158,9 @@ public class QuizService {
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)
                 .build();
+    }
+
+    public List<QuizAttempt> getAttemptsByUserId(Long userId) {
+        return quizAttemptRepository.findByUserId(userId);
     }
 }
