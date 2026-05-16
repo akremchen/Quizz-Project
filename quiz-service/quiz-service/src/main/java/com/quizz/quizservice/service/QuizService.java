@@ -216,6 +216,13 @@ public class QuizService {
         quizRepository.delete(quiz);
     }
 
+    public List<QuizResponse> findQuizzesByCategory(String category) {
+        return quizRepository.findByCategoryIgnoreCase(category)
+                .stream()
+                .map(this::mapToQuizResponse)
+                .toList();
+    }
+
     public List<QuizAttempt> getAttemptsByUserId(Long userId) {
         return quizAttemptRepository.findByUserId(userId);
     }

@@ -66,4 +66,9 @@ public class QuizController {
     public void deleteQuiz(@PathVariable Long id, @RequestParam Long ownerId) {
         quizService.deleteQuiz(id, ownerId);
     }
+
+    @GetMapping("/category/{category}")
+    public List<QuizResponse> findQuizzesByCategory(@PathVariable String category) {
+        return quizService.findQuizzesByCategory(category);
+    }
 }
