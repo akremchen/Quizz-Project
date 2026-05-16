@@ -1,8 +1,8 @@
 package com.quizz.quizservice.dto;
 
+import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -10,36 +10,35 @@ import java.util.List;
 
 @Getter
 @Setter
-public class CreateQuizRequest {
+public class UpdateQuizRequest {
 
-    @NotNull(message = "Owner id is required")
-    private Long ownerId;
-
-    @NotBlank
+    @NotBlank(message = "Title is required")
     private String title;
 
     private String description;
 
-    @NotBlank
+    @NotBlank(message = "Category is required")
     private String category;
 
-    @NotEmpty
+    @NotEmpty(message = "Questions cannot be empty")
+    @Valid
     private List<QuestionRequest> questions;
 
     @Getter
     @Setter
     public static class QuestionRequest {
-        @NotBlank
+        @NotBlank(message = "Question is required")
         private String question;
 
-        @NotEmpty
+        @NotEmpty(message = "Options cannot be empty")
+        @Valid
         private List<AnswerRequest> options;
     }
 
     @Getter
     @Setter
     public static class AnswerRequest {
-        @NotBlank
+        @NotBlank(message = "Answer is required")
         private String answer;
 
         private boolean correct;

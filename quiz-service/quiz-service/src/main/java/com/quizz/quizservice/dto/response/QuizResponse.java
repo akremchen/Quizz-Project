@@ -10,6 +10,7 @@ import java.util.List;
 @Builder
 public class QuizResponse {
     private Long id;
+    private Long ownerId;
     private String title;
     private String description;
     private String category;

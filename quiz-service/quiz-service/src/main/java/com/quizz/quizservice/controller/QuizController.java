@@ -3,6 +3,7 @@ package com.quizz.quizservice.controller;
 
 import com.quizz.quizservice.dto.CreateQuizRequest;
 import com.quizz.quizservice.dto.SubmitQuizRequest;
+import com.quizz.quizservice.dto.UpdateQuizRequest;
 import com.quizz.quizservice.dto.response.QuizResponse;
 import com.quizz.quizservice.dto.response.QuizResultResponse;
 import com.quizz.quizservice.entity.Quiz;
@@ -50,5 +51,24 @@ public class QuizController {
     @GetMapping("/users/{userId}/attempts")
     public List<QuizAttempt> getAttemptsByUserId(@PathVariable Long userId) {
         return quizService.getAttemptsByUserId(userId);
+    }
+
+    @PutMapping("/{id}")
+    public QuizResponse updateQuiz(
+            @PathVariable Long id,
+            @RequestParam Long ownerId,
+            @Valid @RequestBody UpdateQuizRequest request
+    ) {
+       return quizService.updateQuiz(id, ownerId, request);
+    }
+
+    @DeleteMapping("/{id}")
+    public void deleteQuiz(@PathVariable Long id, @RequestParam Long ownerId) {
+        quizService.deleteQuiz(id, ownerId);
+    }
+
+    @GetMapping("/category/{category}")
+    public List<QuizResponse> findQuizzesByCategory(@PathVariable String category) {
+        return quizService.findQuizzesByCategory(category);
     }
 }

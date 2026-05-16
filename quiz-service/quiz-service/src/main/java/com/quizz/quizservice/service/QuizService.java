@@ -1,6 +1,7 @@
 package com.quizz.quizservice.service;
 
 import com.quizz.quizservice.dto.SubmitQuizRequest;
+import com.quizz.quizservice.dto.UpdateQuizRequest;
 import com.quizz.quizservice.dto.response.AnswerOptionResponse;
 import com.quizz.quizservice.dto.CreateQuizRequest;
 import com.quizz.quizservice.dto.response.QuestionResponse;
@@ -31,6 +32,7 @@ public class QuizService {
 
         //create quiz object
         Quiz quiz = Quiz.builder()
+                .ownerId(request.getOwnerId())
                 .title(request.getTitle())
                 .category(request.getCategory())
                 .description(request.getDescription())
@@ -67,6 +69,7 @@ public class QuizService {
     private QuizResponse mapToQuizResponse(Quiz quiz) {
         return QuizResponse.builder()
                 .id(quiz.getId())
+                .ownerId(quiz.getOwnerId())
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
                 .category(quiz.getCategory())
@@ -158,6 +161,66 @@ public class QuizService {
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)
                 .build();
+    }
+
+    public QuizResponse updateQuiz(Long quizId, Long ownerId, UpdateQuizRequest request) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Quiz not found with id: " + quizId));
+
+        if (!quiz.getOwnerId().equals(ownerId)) {
+            throw new BadRequestException("Only the quiz owner can update this quiz");
+        }
+
+        quiz.setTitle(request.getTitle());
+        quiz.setDescription(request.getDescription());
+        quiz.setCategory(request.getCategory());
+
+        quiz.getQuestions().clear();
+
+        List<Question> updatedQuestions = request.getQuestions().stream()
+                .map(questionRequest -> {
+                    Question question = Question.builder()
+                            .question(questionRequest.getQuestion())
+                            .quiz(quiz)
+                            .build();
+
+                    List<AnswerOption> answers = questionRequest.getOptions().stream()
+                            .map(optionRequest -> AnswerOption.builder()
+                                    .answer(optionRequest.getAnswer())
+                                    .correct(optionRequest.isCorrect())
+                                    .question(question)
+                                    .build())
+                            .toList();
+
+                    question.setAnswers(answers);
+                    return question;
+                })
+                .toList();
+
+        quiz.getQuestions().addAll(updatedQuestions);
+
+        Quiz savedQuiz = quizRepository.save(quiz);
+
+        return mapToQuizResponse(savedQuiz);
+    }
+
+    public void deleteQuiz(Long quizId, Long ownerId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found with id: " + quizId));
+
+        if(!ownerId.equals(quiz.getOwnerId())) {
+            throw new BadRequestException("Only the quiz owner can delete this quiz");
+        }
+
+        quizRepository.delete(quiz);
+    }
+
+    public List<QuizResponse> findQuizzesByCategory(String category) {
+        return quizRepository.findByCategoryIgnoreCase(category)
+                .stream()
+                .map(this::mapToQuizResponse)
+                .toList();
     }
 
     public List<QuizAttempt> getAttemptsByUserId(Long userId) {
