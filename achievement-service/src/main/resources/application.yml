@@ -11,8 +11,8 @@ spring:
 
   datasource:
     url: jdbc:postgresql://localhost:5432/achievement_db
-    username: postgres
-    password: password
+    username: achievement_user
+    password: achievement_pass
 
   jpa:
     hibernate:
@@ -22,4 +22,4 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: localhost:9092
+    bootstrap-servers: kafka:9092

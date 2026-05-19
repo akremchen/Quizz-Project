@@ -20,12 +20,14 @@ public class AchievementService {
 
     public void processQuizCompletion(QuizCompletedRequest request) {
         Long userId = request.getUserId();
-        double scorePercentage = (double) request.getCorrectAnswers() / request.getTotalQuestions();
+        double rawPercentage = ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
+        long roundedScore = Math.round(rawPercentage);
 
-        if (scorePercentage >= 0.5) {
-            int pointsEarned = (int) (scorePercentage * 100);
-            UserPoints userPoints = pointsRepository.findByUserId(userId)
-                    .orElse(UserPoints.builder().userId(userId).points(0).build());
+        UserPoints userPoints = pointsRepository.findByUserId(userId)
+                .orElse(UserPoints.builder().userId(userId).points(0).build());
+
+        if (roundedScore >= 50) {
+            int pointsEarned = (int) roundedScore;
             userPoints.setPoints(userPoints.getPoints() + pointsEarned);
             pointsRepository.save(userPoints);
         }
@@ -34,9 +36,67 @@ public class AchievementService {
             badgeRepository.save(UserBadge.builder().userId(userId).badgeName("First Quiz Completed").build());
         }
 
-        if (request.getCorrectAnswers() >= request.getTotalQuestions()) {
+        if (roundedScore == 100) {
             if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Perfect Score")) {
                 badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Perfect Score").build());
+            }
+        }
+
+        String streakMilestone = request.getStreakMilestone();
+
+        if ("MONTH".equals(streakMilestone)) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Month Streak")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Month Streak").build());
+            }
+        }
+        else if ("WEEK".equalsIgnoreCase(streakMilestone)) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Week Streak")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Week Streak").build());
+            }
+        }
+
+        if (roundedScore == 100 && ("WEEK".equalsIgnoreCase(streakMilestone) || "MONTH".equalsIgnoreCase(streakMilestone))) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Golden Streak")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Golden Streak").build());
+            }
+        }
+
+        int totalPoints = userPoints.getPoints();
+        if (totalPoints >= 100000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Titan earned 100000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Titan earned 100000 Points").build());
+            }
+        } else if (totalPoints >= 50000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Immortal earned 50000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Immortal earned 50000 Points").build());
+            }
+        } else if (totalPoints >= 20000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Conqueror earned 20000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Conqueror earned 20000 Points").build());
+            }
+        } else if (totalPoints >= 10000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Champion earned 10000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Champion earned 10000 Points").build());
+            }
+        } else if (totalPoints >= 5000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Champion earned 5000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Champion earned 5000 Points").build());
+            }
+        } else if (totalPoints >= 2500) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Master earned 2500 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Master earned 2500 Points").build());
+            }
+        } else if (totalPoints >= 1000) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Elite earned 1000 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Elite earned 1000 Points").build());
+            }
+        } else if (totalPoints >= 500) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Challenger earned 500 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Challenger earned 500 Points").build());
+            }
+        } else if (totalPoints >= 100) {
+            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Rookie earned 100 Points")) {
+                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Rookie earned 100 Points").build());
             }
         }
     }

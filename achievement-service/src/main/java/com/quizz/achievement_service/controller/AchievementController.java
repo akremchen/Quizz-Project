@@ -22,7 +22,7 @@ public class AchievementController {
     @PostMapping("/quiz-completed")
     public ResponseEntity<String> processQuizCompletion(@RequestBody QuizCompletedRequest request) {
         achievementService.processQuizCompletion(request);
-        return ResponseEntity.ok("Quiz completion processed successfully!");
+        return ResponseEntity.ok().build();
     }
 
     @GetMapping("/{userId}/points")

@@ -16,4 +16,5 @@ public class QuizCompletedRequest {
     private Long userId;
     private int correctAnswers;
     private int totalQuestions;
+    private String streakMilestone;
 }
