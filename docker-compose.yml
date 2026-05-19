@@ -24,7 +24,7 @@ services:
 
   quiz-service:
     build:
-      context: ./quiz-service/quiz-service
+      context: ./quiz-service
       dockerfile: Dockerfile
     container_name: quiz-service
     depends_on:
