@@ -5,6 +5,7 @@ import com.quizz.achievement_service.dto.UserBadgesResponse;
 import com.quizz.achievement_service.dto.UserPointsResponse;
 import com.quizz.achievement_service.entity.UserBadge;
 import com.quizz.achievement_service.entity.UserPoints;
+import com.quizz.achievement_service.exception.BadRequestException;
 import com.quizz.achievement_service.repository.UserBadgeRepository;
 import com.quizz.achievement_service.repository.UserPointsRepository;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +20,13 @@ public class AchievementService {
     private final UserBadgeRepository badgeRepository;
 
     public void processQuizCompletion(QuizCompletedRequest request) {
+        if (request.getTotalQuestions() <= 0) {
+            throw new BadRequestException("Total questions must be at least 1");
+        }
+        if (request.getCorrectAnswers() > request.getTotalQuestions()) {
+            throw new BadRequestException("Correct answers cannot be more than total questions");
+        }
+
         Long userId = request.getUserId();
         double rawPercentage = ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
         long roundedScore = Math.round(rawPercentage);

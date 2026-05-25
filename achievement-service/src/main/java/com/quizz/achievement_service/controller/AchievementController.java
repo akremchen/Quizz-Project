@@ -4,6 +4,7 @@ import com.quizz.achievement_service.dto.QuizCompletedRequest;
 import com.quizz.achievement_service.dto.UserBadgesResponse;
 import com.quizz.achievement_service.dto.UserPointsResponse;
 import com.quizz.achievement_service.service.AchievementService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -20,7 +21,7 @@ public class AchievementController {
     }
 
     @PostMapping("/quiz-completed")
-    public ResponseEntity<String> processQuizCompletion(@RequestBody QuizCompletedRequest request) {
+    public ResponseEntity<String> processQuizCompletion(@Valid @RequestBody QuizCompletedRequest request) {
         achievementService.processQuizCompletion(request);
         return ResponseEntity.ok().build();
     }
