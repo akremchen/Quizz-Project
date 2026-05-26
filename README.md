@@ -35,5 +35,5 @@ Distributed quiz platform built with Spring Boot, REST APIs, Kafka, and microser
 | Kafka | 9092 |
 
 ## Current Status
-
-Project setup in progress.
+Both microservices (`quiz-service` and `achievement-service`) are up, running, and working perfectly together behind the Nginx gateway.
+**In Progress:** We are currently implementing the third microservice (`notification-service`) to handle automated user alerts.
