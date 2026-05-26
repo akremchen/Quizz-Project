@@ -34,6 +34,13 @@ Distributed quiz platform built with Spring Boot, REST APIs, Kafka, and microser
 | Notification Service | 8084 |
 | Kafka | 9092 |
 
+## Team Members
+- Akrem Cheniour (564828)
+- Enkhjin Erkhembayar (597263)
+- Raneem Alboush (593973)
+- Vasilena Kapincheva (589678)
+
+
 ## Current Status
 Both microservices (`quiz-service` and `achievement-service`) are up, running, and working perfectly together behind the Nginx gateway.
 **In Progress:** We are currently implementing the third microservice (`notification-service`) to handle automated user alerts.
