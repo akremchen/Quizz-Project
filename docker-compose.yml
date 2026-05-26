@@ -1,0 +1,67 @@
+services:
+  gateway:
+    image: nginx:alpine
+    container_name: api_gateway
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      - "8080:80"
+    depends_on:
+      - quiz-service
+      - achievement-service
+
+  quiz-db:
+    image: postgres:16
+    container_name: quiz-db
+    environment:
+      POSTGRES_DB: quizdb
+      POSTGRES_USER: quizuser
+      POSTGRES_PASSWORD: quizpass
+    ports:
+      - "5433:5432"
+    volumes:
+      - quiz-db-data:/var/lib/postgresql/data
+
+  quiz-service:
+    build:
+      context: ./quiz-service
+      dockerfile: Dockerfile
+    container_name: quiz-service
+    depends_on:
+      - quiz-db
+    ports:
+      - "8082:8082"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://quiz-db:5432/quizdb
+      SPRING_DATASOURCE_USERNAME: quizuser
+      SPRING_DATASOURCE_PASSWORD: quizpass
+
+  achievement-db:
+    image: postgres:16
+    container_name: achievement-db
+    environment:
+      POSTGRES_DB: achievement_db
+      POSTGRES_USER: achievement_user
+      POSTGRES_PASSWORD: achievement_pass
+    ports:
+      - "5434:5432"
+    volumes:
+      - achievement-db-data:/var/lib/postgresql/data
+
+  achievement-service:
+    build:
+      context: ./achievement-service
+      dockerfile: Dockerfile
+    container_name: achievement-service
+    depends_on:
+      - achievement-db
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://achievement-db:5432/achievement_db
+      SPRING_DATASOURCE_USERNAME: achievement_user
+      SPRING_DATASOURCE_PASSWORD: achievement_pass
+
+volumes:
+  quiz-db-data:
+  achievement-db-data:
