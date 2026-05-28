@@ -33,8 +33,13 @@ public class Notification {
     private NotificationType type;
 
     @Column(nullable = false)
-    private boolean read;
+    private boolean readStatus;
 
     @Column(nullable = false)
     private LocalDateTime createdAt;
+
+    @PrePersist
+    public void prePersist() {
+        this.createdAt = LocalDateTime.now();
+    }
 }

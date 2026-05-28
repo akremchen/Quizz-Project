@@ -2,6 +2,7 @@ package com.quizz.notification_service.controller;
 
 import com.quizz.notification_service.entity.Notification;
 import com.quizz.notification_service.service.NotificationService;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,7 +29,11 @@ public class NotificationController {
 
     @PatchMapping("/{notificationId}/read")
     public ResponseEntity<Void> markAsRead(@PathVariable UUID notificationId) {
-        notificationService.markAsRead(notificationId);
-        return ResponseEntity.noContent().build();
+        try {
+            notificationService.markAsRead(notificationId);
+            return ResponseEntity.noContent().build();
+        } catch (EntityNotFoundException e) {
+            return ResponseEntity.notFound().build();
+        }
     }
 }

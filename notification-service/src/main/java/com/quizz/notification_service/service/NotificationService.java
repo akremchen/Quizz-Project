@@ -3,6 +3,7 @@ package com.quizz.notification_service.service;
 import com.quizz.notification_service.entity.Notification;
 import com.quizz.notification_service.entity.NotificationType;
 import com.quizz.notification_service.repository.NotificationRepository;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -22,8 +23,7 @@ public class NotificationService {
                 .title(title)
                 .message(message)
                 .type(type)
-                .read(false)
-                .createdAt(LocalDateTime.now())
+                .readStatus(false)
                 .build();
 
         return notificationRepository.save(notification);
@@ -34,13 +34,14 @@ public class NotificationService {
     }
 
     public List<Notification> getUnreadNotifications(UUID userId) {
-        return notificationRepository.findByUserIdAndReadFalse(userId);
+        return notificationRepository.findByUserIdAndReadStatusFalseOrderByCreatedAtDesc(userId);
     }
 
     public void markAsRead(UUID notificationId) {
-        notificationRepository.findById(notificationId).ifPresent(n -> {
-            n.setRead(true);
-            notificationRepository.save(n);
-        });
+        Notification notification = notificationRepository.findById(notificationId)
+                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
+
+        notification.setReadStatus(true);
+        notificationRepository.save(notification);
     }
 }
