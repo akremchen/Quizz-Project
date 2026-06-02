@@ -9,7 +9,6 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
 import java.util.Map;
-import java.util.UUID;
 
 @Slf4j
 @Component
@@ -23,8 +22,9 @@ public class NotificationKafkaConsumer {
     public void handleQuizPublished(String message) {
         try {
             Map<?, ?> payload = objectMapper.readValue(message, Map.class);
-            UUID userId = UUID.fromString((String) payload.get("userId"));
-            String quizTitle = (String) payload.get("quizTitle");
+
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            String quizTitle = payload.get("quizTitle").toString();
 
             notificationService.createNotification(
                     userId,
@@ -43,8 +43,9 @@ public class NotificationKafkaConsumer {
     public void handleBadgeEarned(String message) {
         try {
             Map<?, ?> payload = objectMapper.readValue(message, Map.class);
-            UUID userId = UUID.fromString((String) payload.get("userId"));
-            String badgeName = (String) payload.get("badgeName");
+
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            String badgeName = payload.get("badgeName").toString();
 
             notificationService.createNotification(
                     userId,
@@ -63,8 +64,9 @@ public class NotificationKafkaConsumer {
     public void handlePointsEarned(String message) {
         try {
             Map<?, ?> payload = objectMapper.readValue(message, Map.class);
-            UUID userId = UUID.fromString((String) payload.get("userId"));
-            int points = (int) payload.get("points");
+
+            Long userId = Long.valueOf(payload.get("userId").toString());
+            int points = Integer.parseInt(payload.get("points").toString());
 
             notificationService.createNotification(
                     userId,

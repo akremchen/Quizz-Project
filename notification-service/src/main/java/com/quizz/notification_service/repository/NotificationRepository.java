@@ -8,8 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 @Repository
-public interface NotificationRepository extends JpaRepository<Notification, UUID> {
+public interface NotificationRepository extends JpaRepository<Notification, Long> {
 
-    List<Notification> findByUserIdOrderByCreatedAtDesc(UUID userId);
+    List<Notification> findByUserIdOrderByCreatedAtDesc(Long userId);
 
-    List<Notification> findByUserIdAndReadStatusFalseOrderByCreatedAtDesc(UUID userId);}
+    List<Notification> findByUserIdAndReadStatusFalseOrderByCreatedAtDesc(Long userId);}

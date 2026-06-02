@@ -6,6 +6,7 @@ import com.quizz.achievement_service.dto.UserPointsResponse;
 import com.quizz.achievement_service.entity.UserBadge;
 import com.quizz.achievement_service.entity.UserPoints;
 import com.quizz.achievement_service.exception.BadRequestException;
+import com.quizz.achievement_service.kafka.AchievementEventProducer;
 import com.quizz.achievement_service.repository.UserBadgeRepository;
 import com.quizz.achievement_service.repository.UserPointsRepository;
 import lombok.RequiredArgsConstructor;
@@ -18,6 +19,7 @@ import java.util.List;
 public class AchievementService {
     private final UserPointsRepository pointsRepository;
     private final UserBadgeRepository badgeRepository;
+    private final AchievementEventProducer eventProducer;
 
     public void processQuizCompletion(QuizCompletedRequest request) {
         if (request.getTotalQuestions() <= 0) {
@@ -40,8 +42,11 @@ public class AchievementService {
             pointsRepository.save(userPoints);
         }
 
-        if (!badgeRepository.existsByUserIdAndBadgeName(userId, "First Quiz Completed")) {
-            badgeRepository.save(UserBadge.builder().userId(userId).badgeName("First Quiz Completed").build());
+        String badgeName = "First Quiz Completed";
+
+        if (!badgeRepository.existsByUserIdAndBadgeName(userId, badgeName)) {
+            badgeRepository.save(UserBadge.builder().userId(userId).badgeName(badgeName).build());
+            eventProducer.publishBadgeEarned(userId, badgeName);
         }
 
         if (roundedScore == 100) {

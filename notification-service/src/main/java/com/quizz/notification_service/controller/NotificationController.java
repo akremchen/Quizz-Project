@@ -8,7 +8,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/notifications")
@@ -18,17 +17,17 @@ public class NotificationController {
     private final NotificationService notificationService;
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<Notification>> getAllForUser(@PathVariable UUID userId) {
+    public ResponseEntity<List<Notification>> getAllForUser(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getNotificationsForUser(userId));
     }
 
     @GetMapping("/user/{userId}/unread")
-    public ResponseEntity<List<Notification>> getUnreadForUser(@PathVariable UUID userId) {
+    public ResponseEntity<List<Notification>> getUnreadForUser(@PathVariable Long userId) {
         return ResponseEntity.ok(notificationService.getUnreadNotifications(userId));
     }
 
     @PatchMapping("/{notificationId}/read")
-    public ResponseEntity<Void> markAsRead(@PathVariable UUID notificationId) {
+    public ResponseEntity<Void> markAsRead(@PathVariable Long notificationId) {
         try {
             notificationService.markAsRead(notificationId);
             return ResponseEntity.noContent().build();

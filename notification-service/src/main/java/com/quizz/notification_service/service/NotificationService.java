@@ -7,7 +7,6 @@ import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,7 +16,7 @@ public class NotificationService {
 
     private final NotificationRepository notificationRepository;
 
-    public Notification createNotification(UUID userId, String title, String message, NotificationType type) {
+    public Notification createNotification(Long userId, String title, String message, NotificationType type) {
         Notification notification = Notification.builder()
                 .userId(userId)
                 .title(title)
@@ -29,15 +28,15 @@ public class NotificationService {
         return notificationRepository.save(notification);
     }
 
-    public List<Notification> getNotificationsForUser(UUID userId) {
+    public List<Notification> getNotificationsForUser(Long userId) {
         return notificationRepository.findByUserIdOrderByCreatedAtDesc(userId);
     }
 
-    public List<Notification> getUnreadNotifications(UUID userId) {
+    public List<Notification> getUnreadNotifications(Long userId) {
         return notificationRepository.findByUserIdAndReadStatusFalseOrderByCreatedAtDesc(userId);
     }
 
-    public void markAsRead(UUID notificationId) {
+    public void markAsRead(Long notificationId) {
         Notification notification = notificationRepository.findById(notificationId)
                 .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
 
