@@ -9,6 +9,7 @@ services:
     depends_on:
       - quiz-service
       - achievement-service
+      - notification-service
 
   quiz-db:
     image: postgres:16
@@ -62,6 +63,33 @@ services:
       SPRING_DATASOURCE_USERNAME: achievement_user
       SPRING_DATASOURCE_PASSWORD: achievement_pass
 
+  notification-db:
+    image: postgres:16
+    container_name: notification-db
+    environment:
+      POSTGRES_DB: notification_db
+      POSTGRES_USER: notification_user
+      POSTGRES_PASSWORD: notification_pass
+    ports:
+      - "5435:5432"
+    volumes:
+      - notification-db-data:/var/lib/postgresql/data
+
+  notification-service:
+    build:
+      context: ./notification-service
+      dockerfile: Dockerfile
+    container_name: notification-service
+    depends_on:
+      - notification-db
+    ports:
+      - "8084:8084"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://notification-db:5432/notification_db
+      SPRING_DATASOURCE_USERNAME: notification_user
+      SPRING_DATASOURCE_PASSWORD: notification_pass
+
 volumes:
   quiz-db-data:
   achievement-db-data:
+  notification-db-data:
