@@ -1,5 +1,6 @@
 package com.quizz.quizservice.service;
 
+import com.quizz.quizservice.dto.AchievementNotification;
 import com.quizz.quizservice.dto.SubmitQuizRequest;
 import com.quizz.quizservice.dto.UpdateQuizRequest;
 import com.quizz.quizservice.dto.response.AnswerOptionResponse;
@@ -16,17 +17,22 @@ import com.quizz.quizservice.exception.ResourceNotFoundException;
 import com.quizz.quizservice.repository.QuizAttemptRepository;
 import com.quizz.quizservice.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestClient;
 
 import java.time.LocalDateTime;
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository quizAttemptRepository;
+    private final RestClient achievementRestClient;
 
     public Quiz createQuiz(CreateQuizRequest request) {
 
@@ -154,6 +160,8 @@ public class QuizService {
 
         quizAttemptRepository.save(attempt);
 
+        notifyAchievementService(request.getUserId(), correctAnswers, quiz.getQuestions().size());
+
         return QuizResultResponse.builder()
                 .quizId(quizId)
                 .userId(request.getUserId())
@@ -161,6 +169,25 @@ public class QuizService {
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)
                 .build();
+    }
+
+    private void notifyAchievementService(Long userId, int correctAnswers, int totalQuestions) {
+        AchievementNotification payload = AchievementNotification.builder()
+                .userId(userId)
+                .correctAnswers(correctAnswers)
+                .totalQuestions(totalQuestions)
+                .build();
+
+        try {
+            achievementRestClient.post()
+                    .uri("/api/achievement/quiz-completed")
+                    .contentType(MediaType.APPLICATION_JSON)
+                    .body(payload)
+                    .retrieve()
+                    .toBodilessEntity();
+        } catch (Exception e) {
+            log.warn("Could not notify achievement-service for user {}: {}", userId, e.getMessage());
+        }
     }
 
     public QuizResponse updateQuiz(Long quizId, Long ownerId, UpdateQuizRequest request) {
