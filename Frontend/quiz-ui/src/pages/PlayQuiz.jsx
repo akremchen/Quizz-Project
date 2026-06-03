@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { CheckCircle2 } from 'lucide-react'
 import { getApiError, quizApi } from '../api/quizApi.js'
+import { achievementApi } from '../api/achievementApi'
 
 export default function PlayQuiz({ quizId, navigate, setToast }) {
     const [quiz, setQuiz] = useState(null)
@@ -41,6 +42,12 @@ export default function PlayQuiz({ quizId, navigate, setToast }) {
                 answers: quiz.questions.map((q) => ({ questionId: q.id, selectedOptionId: answers[q.id] })),
             }
             const data = await quizApi.submit(quiz.id, payload)
+            await achievementApi.quizCompleted({
+                userId: data.userId,
+                correctAnswers: data.correctAnswers,
+                totalQuestions: data.totalQuestions,
+                streakMilestone: null,
+            })
             setResult(data)
             setToast({ type: 'success', message: 'Quiz submitted' })
         } catch (error) {
