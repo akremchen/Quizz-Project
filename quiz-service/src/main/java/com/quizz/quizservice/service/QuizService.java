@@ -111,9 +111,15 @@ public class QuizService {
     }
 
     public QuizResponse publishQuiz(Long id) {
-        Quiz quiz = quizRepository.findById(id).orElseThrow(() -> new ResourceNotFoundException("No Quiz found with id " + id));
+        Quiz quiz = quizRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("No Quiz found with id " + id));
+
         quiz.setPublished(true);
+
         Quiz savedQuiz = quizRepository.save(quiz);
+
+        quizEventProducer.publishQuizPublished(savedQuiz);
+
         return mapToQuizResponse(savedQuiz);
     }
 
@@ -156,13 +162,17 @@ public class QuizService {
 
         quizAttemptRepository.save(attempt);
 
-        return QuizResultResponse.builder()
+        QuizResultResponse result = QuizResultResponse.builder()
                 .quizId(quizId)
                 .userId(request.getUserId())
                 .score(correctAnswers)
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)
                 .build();
+
+        quizEventProducer.publishQuizCompleted(result);
+
+        return result;
     }
 
     public QuizResponse updateQuiz(Long quizId, Long ownerId, UpdateQuizRequest request) {

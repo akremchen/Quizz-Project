@@ -17,6 +17,7 @@ import java.util.List;
 @Service
 @RequiredArgsConstructor
 public class AchievementService {
+
     private final UserPointsRepository pointsRepository;
     private final UserBadgeRepository badgeRepository;
     private final AchievementEventProducer eventProducer;
@@ -25,104 +26,109 @@ public class AchievementService {
         if (request.getTotalQuestions() <= 0) {
             throw new BadRequestException("Total questions must be at least 1");
         }
+
         if (request.getCorrectAnswers() > request.getTotalQuestions()) {
             throw new BadRequestException("Correct answers cannot be more than total questions");
         }
 
         Long userId = request.getUserId();
-        double rawPercentage = ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
+
+        double rawPercentage =
+                ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
+
         long roundedScore = Math.round(rawPercentage);
 
         UserPoints userPoints = pointsRepository.findByUserId(userId)
-                .orElse(UserPoints.builder().userId(userId).points(0).build());
+                .orElse(UserPoints.builder()
+                        .userId(userId)
+                        .points(0)
+                        .build());
 
         if (roundedScore >= 50) {
             int pointsEarned = (int) roundedScore;
+
             userPoints.setPoints(userPoints.getPoints() + pointsEarned);
             pointsRepository.save(userPoints);
+
+            eventProducer.publishPointsEarned(userId, pointsEarned);
         }
 
-        String badgeName = "First Quiz Completed";
-
-        if (!badgeRepository.existsByUserIdAndBadgeName(userId, badgeName)) {
-            badgeRepository.save(UserBadge.builder().userId(userId).badgeName(badgeName).build());
-            eventProducer.publishBadgeEarned(userId, badgeName);
-        }
+        awardBadgeIfNotExists(userId, "First Quiz Completed");
 
         if (roundedScore == 100) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Perfect Score")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Perfect Score").build());
-            }
+            awardBadgeIfNotExists(userId, "Perfect Score");
         }
 
         String streakMilestone = request.getStreakMilestone();
 
-        if ("MONTH".equals(streakMilestone)) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Month Streak")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Month Streak").build());
-            }
-        }
-        else if ("WEEK".equalsIgnoreCase(streakMilestone)) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Week Streak")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Week Streak").build());
-            }
+        if ("MONTH".equalsIgnoreCase(streakMilestone)) {
+            awardBadgeIfNotExists(userId, "Month Streak");
+        } else if ("WEEK".equalsIgnoreCase(streakMilestone)) {
+            awardBadgeIfNotExists(userId, "Week Streak");
         }
 
-        if (roundedScore == 100 && ("WEEK".equalsIgnoreCase(streakMilestone) || "MONTH".equalsIgnoreCase(streakMilestone))) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Golden Streak")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Golden Streak").build());
-            }
+        if (roundedScore == 100 &&
+                ("WEEK".equalsIgnoreCase(streakMilestone)
+                        || "MONTH".equalsIgnoreCase(streakMilestone))) {
+            awardBadgeIfNotExists(userId, "Golden Streak");
         }
 
         int totalPoints = userPoints.getPoints();
+
         if (totalPoints >= 100000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Titan earned 100000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Titan earned 100000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Titan earned 100000 Points");
         } else if (totalPoints >= 50000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Immortal earned 50000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Immortal earned 50000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Immortal earned 50000 Points");
         } else if (totalPoints >= 20000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Conqueror earned 20000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Conqueror earned 20000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Conqueror earned 20000 Points");
         } else if (totalPoints >= 10000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Champion earned 10000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Champion earned 10000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Champion earned 10000 Points");
         } else if (totalPoints >= 5000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Champion earned 5000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Champion earned 5000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Champion earned 5000 Points");
         } else if (totalPoints >= 2500) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Master earned 2500 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Master earned 2500 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Master earned 2500 Points");
         } else if (totalPoints >= 1000) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Elite earned 1000 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Elite earned 1000 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Elite earned 1000 Points");
         } else if (totalPoints >= 500) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Challenger earned 500 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Challenger earned 500 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Challenger earned 500 Points");
         } else if (totalPoints >= 100) {
-            if (!badgeRepository.existsByUserIdAndBadgeName(userId, "Point Rookie earned 100 Points")) {
-                badgeRepository.save(UserBadge.builder().userId(userId).badgeName("Point Rookie earned 100 Points").build());
-            }
+            awardBadgeIfNotExists(userId, "Point Rookie earned 100 Points");
+        }
+    }
+
+    private void awardBadgeIfNotExists(Long userId, String badgeName) {
+        if (!badgeRepository.existsByUserIdAndBadgeName(userId, badgeName)) {
+            badgeRepository.save(
+                    UserBadge.builder()
+                            .userId(userId)
+                            .badgeName(badgeName)
+                            .build()
+            );
+
+            eventProducer.publishBadgeEarned(userId, badgeName);
         }
     }
 
     public UserPointsResponse getUserPoints(Long userId) {
         UserPoints points = pointsRepository.findByUserId(userId).orElse(null);
         int total = (points != null) ? points.getPoints() : 0;
-        return UserPointsResponse.builder().userId(userId).points(total).build();
+
+        return UserPointsResponse.builder()
+                .userId(userId)
+                .points(total)
+                .build();
     }
 
     public UserBadgesResponse getUserBadges(Long userId) {
         List<UserBadge> badges = badgeRepository.findByUserId(userId);
-        List<String> badgeNames = badges.stream().map(UserBadge::getBadgeName).toList();
-        return UserBadgesResponse.builder().userId(userId).badges(badgeNames).build();
+
+        List<String> badgeNames = badges.stream()
+                .map(UserBadge::getBadgeName)
+                .toList();
+
+        return UserBadgesResponse.builder()
+                .userId(userId)
+                .badges(badgeNames)
+                .build();
     }
 }

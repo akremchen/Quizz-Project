@@ -23,13 +23,14 @@ public class NotificationKafkaConsumer {
         try {
             Map<?, ?> payload = objectMapper.readValue(message, Map.class);
 
-            Long userId = Long.valueOf(payload.get("userId").toString());
-            String quizTitle = payload.get("quizTitle").toString();
+            Long userId = Long.valueOf(payload.get("ownerId").toString());
+            String quizTitle = payload.get("title").toString();
+            String category = payload.get("category").toString();
 
             notificationService.createNotification(
                     userId,
                     "New Quiz Published",
-                    "A new quiz has been published: " + quizTitle,
+                    "A new quiz has been published in " + category + ": " + quizTitle,
                     NotificationType.QUIZ_PUBLISHED
             );
 
