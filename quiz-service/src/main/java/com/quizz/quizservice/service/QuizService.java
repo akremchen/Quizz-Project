@@ -13,6 +13,7 @@ import com.quizz.quizservice.entity.Quiz;
 import com.quizz.quizservice.entity.QuizAttempt;
 import com.quizz.quizservice.exception.BadRequestException;
 import com.quizz.quizservice.exception.ResourceNotFoundException;
+import com.quizz.quizservice.kafka.QuizEventProducer;
 import com.quizz.quizservice.repository.QuizAttemptRepository;
 import com.quizz.quizservice.repository.QuizRepository;
 import lombok.RequiredArgsConstructor;
@@ -27,6 +28,7 @@ public class QuizService {
 
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository quizAttemptRepository;
+    private final QuizEventProducer quizEventProducer;
 
     public Quiz createQuiz(CreateQuizRequest request) {
 

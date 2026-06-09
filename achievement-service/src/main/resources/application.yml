@@ -10,9 +10,9 @@ spring:
       enabled: false
 
   datasource:
-    url: jdbc:postgresql://localhost:5432/achievement_db
-    username: achievement_user
-    password: achievement_pass
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/achievement_db}
+    username: ${SPRING_DATASOURCE_USERNAME:achievement_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:achievement_pass}
 
   jpa:
     hibernate:
@@ -22,4 +22,12 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
 
   kafka:
-    bootstrap-servers: kafka:9092
+    bootstrap-servers: ${SPRING_KAFKA_BOOTSTRAP_SERVERS:localhost:9092}
+    consumer:
+      group-id: achievement-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.apache.kafka.common.serialization.StringSerializer
