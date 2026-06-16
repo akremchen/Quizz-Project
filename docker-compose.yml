@@ -59,6 +59,32 @@ services:
       SPRING_DATASOURCE_PASSWORD: quizpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
 
+  user-db:
+    image: postgres:16
+    container_name: user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_user
+      POSTGRES_PASSWORD: user_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    depends_on:
+      - user-db
+    ports:
+      - "8085:8085"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_db
+      SPRING_DATASOURCE_USERNAME: user_user
+      SPRING_DATASOURCE_PASSWORD: user_pass
+
   achievement-db:
     image: postgres:16
     container_name: achievement-db
