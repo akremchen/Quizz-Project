@@ -1,0 +1,25 @@
+server:
+  port: 8081
+
+spring:
+  application:
+    name: user-service
+
+  cloud:
+    config:
+      enabled: false
+    discovery:
+      enabled: false
+
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/user_db}
+    username: ${SPRING_DATASOURCE_USERNAME:user_admin}
+    password: ${SPRING_DATASOURCE_PASSWORD:user_pass}
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+    show-sql: true
