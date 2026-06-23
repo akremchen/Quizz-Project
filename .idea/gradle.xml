@@ -5,7 +5,7 @@
     <option name="linkedExternalProjectsSettings">
       <GradleProjectSettings>
         <option name="externalProjectPath" value="$PROJECT_DIR$/achievement-service" />
-        <option name="gradleJvm" value="17" />
+        <option name="gradleJvm" value="ms-17" />
         <option name="modules">
           <set>
             <option value="$PROJECT_DIR$/achievement-service" />
@@ -13,20 +13,19 @@
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/notification-service" />
-        <option name="gradleJvm" value="17" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/quiz-service" />
+        <option name="gradleJvm" value="ms-17" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/notification-service" />
+            <option value="$PROJECT_DIR$/quiz-service" />
           </set>
         </option>
       </GradleProjectSettings>
       <GradleProjectSettings>
-        <option name="externalProjectPath" value="$PROJECT_DIR$/quiz-service" />
-        <option name="gradleJvm" value="17" />
+        <option name="externalProjectPath" value="$PROJECT_DIR$/user-service" />
         <option name="modules">
           <set>
-            <option value="$PROJECT_DIR$/quiz-service" />
+            <option value="$PROJECT_DIR$/user-service" />
           </set>
         </option>
       </GradleProjectSettings>

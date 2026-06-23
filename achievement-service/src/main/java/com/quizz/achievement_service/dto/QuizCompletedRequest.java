@@ -25,4 +25,5 @@ public class QuizCompletedRequest {
     private int totalQuestions;
 
     private String streakMilestone;
+    private String category;
 }

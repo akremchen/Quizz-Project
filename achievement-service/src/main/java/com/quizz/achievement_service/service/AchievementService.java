@@ -12,7 +12,9 @@ import com.quizz.achievement_service.repository.UserPointsRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 @RequiredArgsConstructor
@@ -22,35 +24,48 @@ public class AchievementService {
     private final UserBadgeRepository badgeRepository;
     private final AchievementEventProducer eventProducer;
 
+    private static final Map<Integer, String> POINT_MILESTONES = new LinkedHashMap<>();
+    static {
+        POINT_MILESTONES.put(100000, "Point Titan earned 100000 Points");
+        POINT_MILESTONES.put(50000, "Point Immortal earned 50000 Points");
+        POINT_MILESTONES.put(20000, "Point Conqueror earned 20000 Points");
+        POINT_MILESTONES.put(10000, "Point Champion earned 10000 Points");
+        POINT_MILESTONES.put(5000, "Point Champion earned 5000 Points");
+        POINT_MILESTONES.put(2500, "Point Master earned 2500 Points");
+        POINT_MILESTONES.put(1000, "Point Elite earned 1000 Points");
+        POINT_MILESTONES.put(500, "Point Challenger earned 500 Points");
+        POINT_MILESTONES.put(100, "Point Rookie earned 100 Points");
+    }
+
     public void processQuizCompletion(QuizCompletedRequest request) {
         if (request.getTotalQuestions() <= 0) {
             throw new BadRequestException("Total questions must be at least 1");
         }
-
         if (request.getCorrectAnswers() > request.getTotalQuestions()) {
             throw new BadRequestException("Correct answers cannot be more than total questions");
         }
 
         Long userId = request.getUserId();
-
-        double rawPercentage =
-                ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
-
+        double rawPercentage = ((double) request.getCorrectAnswers() / request.getTotalQuestions()) * 100;
         long roundedScore = Math.round(rawPercentage);
 
         UserPoints userPoints = pointsRepository.findByUserId(userId)
-                .orElse(UserPoints.builder()
-                        .userId(userId)
-                        .points(0)
-                        .build());
+                .orElse(UserPoints.builder().userId(userId).points(0).build());
+
+        int oldPoints = userPoints.getPoints();
 
         if (roundedScore >= 50) {
             int pointsEarned = (int) roundedScore;
-
-            userPoints.setPoints(userPoints.getPoints() + pointsEarned);
+            userPoints.setPoints(oldPoints + pointsEarned);
             pointsRepository.save(userPoints);
-
             eventProducer.publishPointsEarned(userId, pointsEarned);
+        }
+
+        int totalPoints = userPoints.getPoints();
+
+        if (oldPoints < 1000 && totalPoints >= 1000) {
+            awardBadgeIfNotExists(userId, "Premium Content Explorer");
+            eventProducer.publishPremiumUnlocked(userId, "TIER_1_PREMIUM");
         }
 
         awardBadgeIfNotExists(userId, "First Quiz Completed");
@@ -60,39 +75,31 @@ public class AchievementService {
         }
 
         String streakMilestone = request.getStreakMilestone();
+        boolean hasStreak = false;
 
         if ("MONTH".equalsIgnoreCase(streakMilestone)) {
             awardBadgeIfNotExists(userId, "Month Streak");
+            hasStreak = true;
         } else if ("WEEK".equalsIgnoreCase(streakMilestone)) {
             awardBadgeIfNotExists(userId, "Week Streak");
+            hasStreak = true;
         }
 
-        if (roundedScore == 100 &&
-                ("WEEK".equalsIgnoreCase(streakMilestone)
-                        || "MONTH".equalsIgnoreCase(streakMilestone))) {
+        if (roundedScore == 100 && hasStreak) {
             awardBadgeIfNotExists(userId, "Golden Streak");
         }
 
-        int totalPoints = userPoints.getPoints();
+        if (request.getTotalQuestions() >= 10 && roundedScore == 100) {
+            awardBadgeIfNotExists(userId, "Flawless Marathon");
+        } else if (request.getCorrectAnswers() == 1 && request.getTotalQuestions() == 1) {
+            awardBadgeIfNotExists(userId, "Speedrunner");
+        }
 
-        if (totalPoints >= 100000) {
-            awardBadgeIfNotExists(userId, "Point Titan earned 100000 Points");
-        } else if (totalPoints >= 50000) {
-            awardBadgeIfNotExists(userId, "Point Immortal earned 50000 Points");
-        } else if (totalPoints >= 20000) {
-            awardBadgeIfNotExists(userId, "Point Conqueror earned 20000 Points");
-        } else if (totalPoints >= 10000) {
-            awardBadgeIfNotExists(userId, "Point Champion earned 10000 Points");
-        } else if (totalPoints >= 5000) {
-            awardBadgeIfNotExists(userId, "Point Champion earned 5000 Points");
-        } else if (totalPoints >= 2500) {
-            awardBadgeIfNotExists(userId, "Point Master earned 2500 Points");
-        } else if (totalPoints >= 1000) {
-            awardBadgeIfNotExists(userId, "Point Elite earned 1000 Points");
-        } else if (totalPoints >= 500) {
-            awardBadgeIfNotExists(userId, "Point Challenger earned 500 Points");
-        } else if (totalPoints >= 100) {
-            awardBadgeIfNotExists(userId, "Point Rookie earned 100 Points");
+        for (Map.Entry<Integer, String> entry : POINT_MILESTONES.entrySet()) {
+            if (totalPoints >= entry.getKey()) {
+                awardBadgeIfNotExists(userId, entry.getValue());
+                break;
+            }
         }
     }
 
@@ -104,7 +111,6 @@ public class AchievementService {
                             .badgeName(badgeName)
                             .build()
             );
-
             eventProducer.publishBadgeEarned(userId, badgeName);
         }
     }
@@ -112,23 +118,12 @@ public class AchievementService {
     public UserPointsResponse getUserPoints(Long userId) {
         UserPoints points = pointsRepository.findByUserId(userId).orElse(null);
         int total = (points != null) ? points.getPoints() : 0;
-
-        return UserPointsResponse.builder()
-                .userId(userId)
-                .points(total)
-                .build();
+        return UserPointsResponse.builder().userId(userId).points(total).build();
     }
 
     public UserBadgesResponse getUserBadges(Long userId) {
         List<UserBadge> badges = badgeRepository.findByUserId(userId);
-
-        List<String> badgeNames = badges.stream()
-                .map(UserBadge::getBadgeName)
-                .toList();
-
-        return UserBadgesResponse.builder()
-                .userId(userId)
-                .badges(badgeNames)
-                .build();
+        List<String> badgeNames = badges.stream().map(UserBadge::getBadgeName).toList();
+        return UserBadgesResponse.builder().userId(userId).badges(badgeNames).build();
     }
 }

@@ -2,8 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/quiz-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/quiz-service.main.iml" />
-      <module fileurl="file://$PROJECT_DIR$/.idea/modules/quiz-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/quiz-service.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/quiz-service/Quizz-Project.quiz-service.main.iml" filepath="$PROJECT_DIR$/.idea/modules/quiz-service/Quizz-Project.quiz-service.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/quiz-service/Quizz-Project.quiz-service.test.iml" filepath="$PROJECT_DIR$/.idea/modules/quiz-service/Quizz-Project.quiz-service.test.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/achievement-service.iml" filepath="$PROJECT_DIR$/.idea/modules/achievement-service.iml" />
     </modules>
   </component>
 </project>

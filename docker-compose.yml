@@ -31,6 +31,11 @@ services:
       KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS: 0
       KAFKA_AUTO_CREATE_TOPICS_ENABLE: "true"
 
+  redis:
+    image: redis:7-alpine
+    container_name: quiz-redis
+    restart: always
+
   quiz-db:
     image: postgres:16
     container_name: quiz-db
@@ -66,8 +71,6 @@ services:
       POSTGRES_DB: achievement_db
       POSTGRES_USER: achievement_user
       POSTGRES_PASSWORD: achievement_pass
-    ports:
-      - "5434:5432"
     volumes:
       - achievement-db-data:/var/lib/postgresql/data
 
@@ -78,6 +81,8 @@ services:
     container_name: achievement-service
     depends_on:
       - achievement-db
+      - kafka
+      - redis
     ports:
       - "8083:8083"
     environment:
@@ -85,6 +90,8 @@ services:
       SPRING_DATASOURCE_USERNAME: achievement_user
       SPRING_DATASOURCE_PASSWORD: achievement_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      SPRING_REDIS_HOST: quiz-redis
+      SPRING_REDIS_PORT: 6379
 
   notification-db:
     image: postgres:16

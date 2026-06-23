@@ -8,11 +8,18 @@ spring:
   cloud:
     config:
       enabled: false
+    discovery:
+      enabled: false
 
   datasource:
     url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5434/achievement_db}
     username: ${SPRING_DATASOURCE_USERNAME:achievement_user}
     password: ${SPRING_DATASOURCE_PASSWORD:achievement_pass}
+
+  data:
+    redis:
+      host: ${SPRING_REDIS_HOST:localhost}
+      port: ${SPRING_REDIS_PORT:6379}
 
   jpa:
     hibernate:

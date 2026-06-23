@@ -6,6 +6,6 @@ COPY . .
 
 RUN ./gradlew bootJar
 
-EXPOSE 8080
+EXPOSE 8082
 
 CMD ["java", "-jar", "build/libs/quiz-service-0.0.1-SNAPSHOT.jar"]

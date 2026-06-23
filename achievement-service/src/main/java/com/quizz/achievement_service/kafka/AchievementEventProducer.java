@@ -44,4 +44,19 @@ public class AchievementEventProducer {
             throw new RuntimeException("Failed to publish points-earned event", e);
         }
     }
+
+    public void publishPremiumUnlocked(Long userId, String premiumTier) {
+        try {
+            Map<String, Object> event = new HashMap<>();
+            event.put("userId", userId);
+            event.put("premiumTier", premiumTier);
+
+            kafkaTemplate.send(
+                    "user-premium-unlocks",
+                    objectMapper.writeValueAsString(event)
+            );
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to publish user-premium-unlocks event", e);
+        }
+    }
 }
