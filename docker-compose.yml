@@ -10,6 +10,7 @@ services:
       - quiz-service
       - achievement-service
       - notification-service
+      - user-service
 
   kafka:
     image: apache/kafka:4.1.2
@@ -146,3 +147,4 @@ volumes:
   quiz-db-data:
   achievement-db-data:
   notification-db-data:
+  user-db-data:

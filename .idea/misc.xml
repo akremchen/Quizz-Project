@@ -5,6 +5,7 @@
     <file type="web" url="file://$PROJECT_DIR$/achievement-service" />
     <file type="web" url="file://$PROJECT_DIR$/notification-service" />
     <file type="web" url="file://$PROJECT_DIR$/quiz-service" />
+    <file type="web" url="file://$PROJECT_DIR$/user-service" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="ms-17" project-jdk-type="JavaSDK">
     <output url="file://$PROJECT_DIR$/out" />
