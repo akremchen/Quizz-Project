@@ -30,11 +30,11 @@ public class QuizService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final QuizEventProducer quizEventProducer;
 
-    public Quiz createQuiz(CreateQuizRequest request) {
+    public Quiz createQuiz( CreateQuizRequest request, Long ownerId ) {
 
         //create quiz object
         Quiz quiz = Quiz.builder()
-                .ownerId(request.getOwnerId())
+                .ownerId(ownerId)
                 .title(request.getTitle())
                 .category(request.getCategory())
                 .description(request.getDescription())
@@ -110,9 +110,15 @@ public class QuizService {
         return mapToQuizResponse(quiz);
     }
 
-    public QuizResponse publishQuiz(Long id) {
+    public QuizResponse publishQuiz(Long id, Long ownerId) {
         Quiz quiz = quizRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("No Quiz found with id " + id));
+
+        if (!quiz.getOwnerId().equals(ownerId)) {
+            throw new BadRequestException(
+                    "Only the quiz owner can publish this quiz"
+            );
+        }
 
         quiz.setPublished(true);
 
@@ -123,7 +129,7 @@ public class QuizService {
         return mapToQuizResponse(savedQuiz);
     }
 
-    public QuizResultResponse submitQuiz(Long quizId, SubmitQuizRequest request) {
+    public QuizResultResponse submitQuiz(Long quizId, SubmitQuizRequest request, Long userId) {
 
         Quiz quiz = quizRepository.findById(quizId).orElseThrow(() ->
                 new ResourceNotFoundException("Quiz not found"));
@@ -153,7 +159,7 @@ public class QuizService {
 
         QuizAttempt attempt = QuizAttempt.builder()
                 .quizId(quizId)
-                .userId(request.getUserId())
+                .userId(userId)
                 .score(correctAnswers)
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)
@@ -164,7 +170,7 @@ public class QuizService {
 
         QuizResultResponse result = QuizResultResponse.builder()
                 .quizId(quizId)
-                .userId(request.getUserId())
+                .userId(userId)
                 .score(correctAnswers)
                 .totalQuestions(quiz.getQuestions().size())
                 .correctAnswers(correctAnswers)

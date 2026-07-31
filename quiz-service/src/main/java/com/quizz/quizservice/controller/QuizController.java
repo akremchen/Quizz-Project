@@ -11,6 +11,7 @@ import com.quizz.quizservice.entity.QuizAttempt;
 import com.quizz.quizservice.service.QuizService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -23,8 +24,13 @@ public class QuizController {
     private final QuizService quizService;
 
     @PostMapping
-    public Quiz createQuiz(@Valid @RequestBody CreateQuizRequest request) {
-        return quizService.createQuiz(request);
+    public Quiz createQuiz(
+            @Valid @RequestBody CreateQuizRequest request,
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return quizService.createQuiz(request, userId);
     }
     @GetMapping
     public List<QuizResponse> findAllQuizzes() {
@@ -37,35 +43,54 @@ public class QuizController {
     }
 
     @PatchMapping("/{id}/publish")
-    public QuizResponse publishQuiz(@PathVariable Long id) {
-        return quizService.publishQuiz(id);
+    public QuizResponse publishQuiz(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return quizService.publishQuiz(id, userId);
     }
 
     @PostMapping("/{id}/submit")
     public QuizResultResponse submitQuiz(
-        @PathVariable Long id,
-        @Valid @RequestBody SubmitQuizRequest request)
-    {
-        return quizService.submitQuiz(id, request);
+            @PathVariable Long id,
+            @Valid @RequestBody SubmitQuizRequest request,
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return quizService.submitQuiz(id, request, userId);
     }
 
-    @GetMapping("/users/{userId}/attempts")
-    public List<QuizAttempt> getAttemptsByUserId(@PathVariable Long userId) {
+    @GetMapping("/attempts")
+    public List<QuizAttempt> getMyAttempts(
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
         return quizService.getAttemptsByUserId(userId);
     }
 
     @PutMapping("/{id}")
     public QuizResponse updateQuiz(
             @PathVariable Long id,
-            @RequestParam Long ownerId,
-            @Valid @RequestBody UpdateQuizRequest request
+            @Valid @RequestBody UpdateQuizRequest request,
+            Authentication authentication
     ) {
-       return quizService.updateQuiz(id, ownerId, request);
+        Long userId = (Long) authentication.getDetails();
+
+        return quizService.updateQuiz(id, userId, request);
     }
 
     @DeleteMapping("/{id}")
-    public void deleteQuiz(@PathVariable Long id, @RequestParam Long ownerId) {
-        quizService.deleteQuiz(id, ownerId);
+    public void deleteQuiz(
+            @PathVariable Long id,
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        quizService.deleteQuiz(id, userId);
     }
 
     @GetMapping("/category/{category}")

@@ -59,6 +59,7 @@ services:
       SPRING_DATASOURCE_USERNAME: quizuser
       SPRING_DATASOURCE_PASSWORD: quizpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
 
   user-db:
     image: postgres:16
@@ -107,6 +108,7 @@ services:
     container_name: achievement-service
     depends_on:
       - achievement-db
+      - kafka
     ports:
       - "8083:8083"
     environment:
@@ -114,6 +116,7 @@ services:
       SPRING_DATASOURCE_USERNAME: achievement_user
       SPRING_DATASOURCE_PASSWORD: achievement_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
 
   notification-db:
     image: postgres:16
@@ -142,6 +145,7 @@ services:
       SPRING_DATASOURCE_USERNAME: notification_user
       SPRING_DATASOURCE_PASSWORD: notification_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
 
 
 

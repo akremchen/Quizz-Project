@@ -8,7 +8,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -36,9 +35,23 @@ public class NotificationService {
         return notificationRepository.findByUserIdAndReadStatusFalseOrderByCreatedAtDesc(userId);
     }
 
-    public void markAsRead(Long notificationId) {
-        Notification notification = notificationRepository.findById(notificationId)
-                .orElseThrow(() -> new EntityNotFoundException("Notification not found"));
+    public void markAsRead(
+            Long notificationId,
+            Long userId
+    ) {
+        Notification notification =
+                notificationRepository.findById(notificationId)
+                        .orElseThrow(() ->
+                                new EntityNotFoundException(
+                                        "Notification not found"
+                                )
+                        );
+
+        if (!notification.getUserId().equals(userId)) {
+            throw new EntityNotFoundException(
+                    "Notification not found"
+            );
+        }
 
         notification.setReadStatus(true);
         notificationRepository.save(notification);

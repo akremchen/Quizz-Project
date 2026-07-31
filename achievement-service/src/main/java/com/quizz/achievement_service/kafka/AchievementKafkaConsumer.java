@@ -1,6 +1,6 @@
 package com.quizz.achievement_service.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.ObjectMapper;
 import com.quizz.achievement_service.dto.QuizCompletedRequest;
 import com.quizz.achievement_service.service.AchievementService;
 import lombok.RequiredArgsConstructor;
