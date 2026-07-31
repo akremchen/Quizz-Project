@@ -10,6 +10,7 @@ services:
       - quiz-service
       - achievement-service
       - notification-service
+      - user-service
 
   kafka:
     image: apache/kafka:4.1.2
@@ -58,6 +59,35 @@ services:
       SPRING_DATASOURCE_USERNAME: quizuser
       SPRING_DATASOURCE_PASSWORD: quizpass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
+
+  user-db:
+    image: postgres:16
+    container_name: user-db
+    environment:
+      POSTGRES_DB: user_db
+      POSTGRES_USER: user_user
+      POSTGRES_PASSWORD: user_pass
+    ports:
+      - "5436:5432"
+    volumes:
+      - user-db-data:/var/lib/postgresql/data
+
+  user-service:
+    build:
+      context: ./user-service
+      dockerfile: Dockerfile
+    container_name: user-service
+    depends_on:
+      - user-db
+    ports:
+      - "8085:8085"
+    environment:
+      SERVER_PORT: 8085
+      SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_db
+      SPRING_DATASOURCE_USERNAME: user_user
+      SPRING_DATASOURCE_PASSWORD: user_pass
+      JWT_SECRET: ${JWT_SECRET}
 
   achievement-db:
     image: postgres:16
@@ -78,6 +108,7 @@ services:
     container_name: achievement-service
     depends_on:
       - achievement-db
+      - kafka
     ports:
       - "8083:8083"
     environment:
@@ -85,6 +116,7 @@ services:
       SPRING_DATASOURCE_USERNAME: achievement_user
       SPRING_DATASOURCE_PASSWORD: achievement_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
 
   notification-db:
     image: postgres:16
@@ -113,6 +145,7 @@ services:
       SPRING_DATASOURCE_USERNAME: notification_user
       SPRING_DATASOURCE_PASSWORD: notification_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
+      JWT_SECRET: ${JWT_SECRET}
 
 
 
@@ -120,3 +153,4 @@ volumes:
   quiz-db-data:
   achievement-db-data:
   notification-db-data:
+  user-db-data:

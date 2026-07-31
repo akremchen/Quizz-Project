@@ -12,9 +12,6 @@ import java.util.List;
 @Setter
 public class CreateQuizRequest {
 
-    @NotNull(message = "Owner id is required")
-    private Long ownerId;
-
     @NotBlank
     private String title;
 

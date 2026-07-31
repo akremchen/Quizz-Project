@@ -13,9 +13,6 @@ import java.util.List;
 @Setter
 public class SubmitQuizRequest {
 
-    @NotNull(message = "User id is required")
-    private Long userId;
-
     @NotEmpty(message = "Answers list cannot be empty")
     @Valid
     private List<QuestionAnswerRequest> answers;

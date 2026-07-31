@@ -7,6 +7,7 @@ import com.quizz.achievement_service.service.AchievementService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 @CrossOrigin(origins = "http://localhost:5173")
@@ -16,24 +17,40 @@ import org.springframework.web.bind.annotation.*;
 public class AchievementController {
 
     private final AchievementService achievementService;
+
     @GetMapping("/ping")
     public String ping() {
         return "Achievement Service is up and running!";
     }
 
+   
     @PostMapping("/quiz-completed")
-    public ResponseEntity<String> processQuizCompletion(@Valid @RequestBody QuizCompletedRequest request) {
+    public ResponseEntity<Void> processQuizCompletion(
+            @Valid @RequestBody QuizCompletedRequest request
+    ) {
         achievementService.processQuizCompletion(request);
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/{userId}/points")
-    public ResponseEntity<UserPointsResponse> getUserPoints(@PathVariable Long userId) {
-        return ResponseEntity.ok(achievementService.getUserPoints(userId));
+    @GetMapping("/points")
+    public ResponseEntity<UserPointsResponse> getMyPoints(
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return ResponseEntity.ok(
+                achievementService.getUserPoints(userId)
+        );
     }
 
-    @GetMapping("/{userId}/badges")
-    public ResponseEntity<UserBadgesResponse> getUserBadges(@PathVariable Long userId) {
-        return ResponseEntity.ok(achievementService.getUserBadges(userId));
+    @GetMapping("/badges")
+    public ResponseEntity<UserBadgesResponse> getMyBadges(
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+
+        return ResponseEntity.ok(
+                achievementService.getUserBadges(userId)
+        );
     }
 }

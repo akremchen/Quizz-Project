@@ -1,9 +1,9 @@
 package com.quizz.achievement_service.kafka;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.ObjectMapper;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -26,7 +26,10 @@ public class AchievementEventProducer {
                     objectMapper.writeValueAsString(event)
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to publish badge-earned event", e);
+            throw new RuntimeException(
+                    "Failed to publish badge-earned event",
+                    e
+            );
         }
     }
 
@@ -41,7 +44,10 @@ public class AchievementEventProducer {
                     objectMapper.writeValueAsString(event)
             );
         } catch (Exception e) {
-            throw new RuntimeException("Failed to publish points-earned event", e);
+            throw new RuntimeException(
+                    "Failed to publish points-earned event",
+                    e
+            );
         }
     }
 }
