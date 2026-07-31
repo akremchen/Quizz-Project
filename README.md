@@ -28,7 +28,7 @@ Distributed quiz platform built with Spring Boot, REST APIs, Kafka, and microser
 | API Gateway | 8080 |
 | Discovery Service | 8761 |
 | Config Service | 8888 |
-| User Service | 8081 |
+| User Service | 8085 |
 | Quiz Service | 8082 |
 | Achievement Service | 8083 |
 | Notification Service | 8084 |
@@ -42,5 +42,9 @@ Distributed quiz platform built with Spring Boot, REST APIs, Kafka, and microser
 
 
 ## Current Status
-Both microservices (`quiz-service` and `achievement-service`) are up, running, and working perfectly together behind the Nginx gateway.
-**In Progress:** We are currently implementing the third microservice (`notification-service`) to handle automated user alerts.
+We have all 4 microservices (`quiz-service`, `notification-service`, `achievement-service`, and `user-service`) are up, running, and working perfectly together behind the Nginx gateway.
+
+## In Progress / Next Steps
+1. **User Service Logic:** Finalizing the actual business logic, REST controllers, and database interactions for user registration and authentication.
+2. **Frontend Integration:** Connecting the React/Vite UI to the newly running `user-service` endpoints.
+3. **Core Infrastructure:** Building and integrating the **Eureka Discovery Service** and **Config Server** to complete the planned microservice architecture.
