@@ -86,6 +86,7 @@ services:
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_db
       SPRING_DATASOURCE_USERNAME: user_user
       SPRING_DATASOURCE_PASSWORD: user_pass
+      JWT_SECRET: ${JWT_SECRET}
 
   achievement-db:
     image: postgres:16
