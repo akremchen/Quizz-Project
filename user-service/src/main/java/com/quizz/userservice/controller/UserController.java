@@ -1,14 +1,12 @@
 package com.quizz.userservice.controller;
 
-import com.quizz.userservice.dto.LoginRequest;
-import com.quizz.userservice.dto.LoginResponse;
-import com.quizz.userservice.dto.RegisterUserRequest;
-import com.quizz.userservice.dto.UserResponse;
+import com.quizz.userservice.dto.*;
 import com.quizz.userservice.entity.User;
 import com.quizz.userservice.security.JwtService;
 import com.quizz.userservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -80,5 +78,43 @@ public class UserController {
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    @GetMapping("/me")
+    public ResponseEntity<UserResponse> getMyProfile(
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        User user = userService.getCurrentUser(email);
+
+        return ResponseEntity.ok(toResponse(user));
+    }
+
+    @PutMapping("/me")
+    public ResponseEntity<UserResponse> updateMyProfile(
+            @RequestBody UpdateProfileRequest request,
+            Authentication authentication
+    ) {
+        String currentEmail = authentication.getName();
+
+        User updatedUser = userService.updateProfile(
+                currentEmail,
+                request
+        );
+
+        return ResponseEntity.ok(toResponse(updatedUser));
+    }
+
+    @PatchMapping("/me/password")
+    public ResponseEntity<Void> changeMyPassword(
+            @RequestBody ChangePasswordRequest request,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        userService.changePassword(email, request);
+
+        return ResponseEntity.noContent().build();
     }
 }
