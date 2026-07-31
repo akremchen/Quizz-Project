@@ -59,20 +59,6 @@ public class AchievementService {
             awardBadgeIfNotExists(userId, "Perfect Score");
         }
 
-        String streakMilestone = request.getStreakMilestone();
-
-        if ("MONTH".equalsIgnoreCase(streakMilestone)) {
-            awardBadgeIfNotExists(userId, "Month Streak");
-        } else if ("WEEK".equalsIgnoreCase(streakMilestone)) {
-            awardBadgeIfNotExists(userId, "Week Streak");
-        }
-
-        if (roundedScore == 100 &&
-                ("WEEK".equalsIgnoreCase(streakMilestone)
-                        || "MONTH".equalsIgnoreCase(streakMilestone))) {
-            awardBadgeIfNotExists(userId, "Golden Streak");
-        }
-
         int totalPoints = userPoints.getPoints();
 
         if (totalPoints >= 100000) {
@@ -130,5 +116,27 @@ public class AchievementService {
                 .userId(userId)
                 .badges(badgeNames)
                 .build();
+    }
+
+    public void processStreakMilestones(
+            Long userId,
+            int currentStreak,
+            long scorePercentage
+    ) {
+        boolean reachedMilestone = false;
+
+        if (currentStreak >= 30) {
+            awardBadgeIfNotExists(userId, "Month Streak");
+            reachedMilestone = true;
+        }
+
+        if (currentStreak >= 7) {
+            awardBadgeIfNotExists(userId, "Week Streak");
+            reachedMilestone = true;
+        }
+
+        if (reachedMilestone && scorePercentage == 100) {
+            awardBadgeIfNotExists(userId, "Golden Streak");
+        }
     }
 }

@@ -1,5 +1,6 @@
 package com.quizz.achievement_service.service;
 
+import com.quizz.achievement_service.dto.UserStreakResponse;
 import com.quizz.achievement_service.entity.UserStreak;
 import com.quizz.achievement_service.repository.UserStreakRepository;
 import org.springframework.stereotype.Service;
@@ -39,5 +40,16 @@ public class StreakService {
     }
     public Optional<UserStreak> getStreakByUserId(Long userId) {
         return streakRepository.findByUserId(userId);
+    }
+
+    public UserStreakResponse getUserStreak(Long userId) {
+        UserStreak streak = streakRepository.findByUserId(userId)
+                .orElse(new UserStreak(userId, null, null));
+
+        return new UserStreakResponse(
+                userId,
+                streak.getCurrentStreak(),
+                streak.getLongestStreak()
+        );
     }
 }
