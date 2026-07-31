@@ -82,6 +82,7 @@ services:
     ports:
       - "8085:8085"
     environment:
+      SERVER_PORT: 8085
       SPRING_DATASOURCE_URL: jdbc:postgresql://user-db:5432/user_db
       SPRING_DATASOURCE_USERNAME: user_user
       SPRING_DATASOURCE_PASSWORD: user_pass
