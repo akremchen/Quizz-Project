@@ -4,6 +4,7 @@ package com.quizz.quizservice.controller;
 import com.quizz.quizservice.dto.CreateQuizRequest;
 import com.quizz.quizservice.dto.SubmitQuizRequest;
 import com.quizz.quizservice.dto.UpdateQuizRequest;
+import org.springframework.http.ResponseEntity;
 import com.quizz.quizservice.dto.response.QuizResponse;
 import com.quizz.quizservice.dto.response.QuizResultResponse;
 import com.quizz.quizservice.entity.Quiz;
@@ -96,5 +97,20 @@ public class QuizController {
     @GetMapping("/category/{category}")
     public List<QuizResponse> findQuizzesByCategory(@PathVariable String category) {
         return quizService.findQuizzesByCategory(category);
+    }
+
+    @GetMapping("/premium")
+    public ResponseEntity<List<QuizResponse>> getPremiumQuizzes() {
+        return ResponseEntity.ok(quizService.getPremiumQuizzes());
+    }
+
+    @PostMapping("/{quizId}/unlock")
+    public ResponseEntity<String> unlockQuiz(
+            @PathVariable Long quizId,
+            Authentication authentication
+    ) {
+        Long userId = (Long) authentication.getDetails();
+        quizService.unlockQuiz(quizId, userId);
+        return ResponseEntity.ok("Quiz unlocked successfully!");
     }
 }
