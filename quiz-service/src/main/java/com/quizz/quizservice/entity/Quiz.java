@@ -23,6 +23,12 @@ public class Quiz {
     private Boolean published;
     private LocalDateTime createdAt;
 
+    @Builder.Default
+    private boolean isPremium = false;
+
+    @Builder.Default
+    private Integer unlockPoints = 0;
+
     @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Question> questions;
 }

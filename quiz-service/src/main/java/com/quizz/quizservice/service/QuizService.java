@@ -1,5 +1,6 @@
 package com.quizz.quizservice.service;
 
+import com.quizz.quizservice.client.UserClient;
 import com.quizz.quizservice.dto.SubmitQuizRequest;
 import com.quizz.quizservice.dto.UpdateQuizRequest;
 import com.quizz.quizservice.dto.response.AnswerOptionResponse;
@@ -16,8 +17,11 @@ import com.quizz.quizservice.exception.ResourceNotFoundException;
 import com.quizz.quizservice.kafka.QuizEventProducer;
 import com.quizz.quizservice.repository.QuizAttemptRepository;
 import com.quizz.quizservice.repository.QuizRepository;
+import com.quizz.quizservice.entity.UserUnlockedQuiz;
+import com.quizz.quizservice.repository.UserUnlockedQuizRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -29,10 +33,36 @@ public class QuizService {
     private final QuizRepository quizRepository;
     private final QuizAttemptRepository quizAttemptRepository;
     private final QuizEventProducer quizEventProducer;
+    private final UserUnlockedQuizRepository userUnlockedQuizRepository;
+    private final UserClient userClient;
+
+    @Transactional
+    public void unlockQuiz(Long quizId, Long userId) {
+        Quiz quiz = quizRepository.findById(quizId)
+                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+
+        if (!quiz.isPremium()) {
+            throw new BadRequestException("This quiz is not a premium locked quiz");
+        }
+
+        boolean alreadyUnlocked = userUnlockedQuizRepository.existsByUserIdAndQuizId(userId, quizId);
+        if (alreadyUnlocked) {
+            throw new BadRequestException("You have already unlocked this quiz");
+        }
+
+        userClient.deductPoints(userId, 50);
+
+        UserUnlockedQuiz unlockedQuiz = UserUnlockedQuiz.builder()
+                .userId(userId)
+                .quizId(quizId)
+                .unlockedAt(LocalDateTime.now())
+                .build();
+
+        userUnlockedQuizRepository.save(unlockedQuiz);
+    }
 
     public Quiz createQuiz( CreateQuizRequest request, Long ownerId ) {
 
-        //create quiz object
         Quiz quiz = Quiz.builder()
                 .ownerId(ownerId)
                 .title(request.getTitle())
@@ -236,6 +266,13 @@ public class QuizService {
 
     public List<QuizResponse> findQuizzesByCategory(String category) {
         return quizRepository.findByCategoryIgnoreCase(category)
+                .stream()
+                .map(this::mapToQuizResponse)
+                .toList();
+    }
+
+    public List<QuizResponse> getPremiumQuizzes() {
+        return quizRepository.findByIsPremiumTrue()
                 .stream()
                 .map(this::mapToQuizResponse)
                 .toList();
