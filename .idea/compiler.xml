@@ -17,6 +17,9 @@
       <module name="achievement-service" options="-parameters" />
       <module name="achievement-service.main" options="-parameters" />
       <module name="achievement-service.test" options="-parameters" />
+      <module name="discovery-service" options="-parameters" />
+      <module name="discovery-service.main" options="-parameters" />
+      <module name="discovery-service.test" options="-parameters" />
       <module name="notification-service" options="-parameters" />
       <module name="notification-service.main" options="-parameters" />
       <module name="notification-service.test" options="-parameters" />

@@ -80,6 +80,7 @@ services:
     container_name: user-service
     depends_on:
       - user-db
+      - discovery-service
     ports:
       - "8085:8085"
     environment:
@@ -146,6 +147,12 @@ services:
       SPRING_DATASOURCE_PASSWORD: notification_pass
       SPRING_KAFKA_BOOTSTRAP_SERVERS: kafka:9092
       JWT_SECRET: dev-secret-key-for-jwt-signing-must-be-at-least-32-characters
+
+  discovery-service:
+    build: ./discovery-service
+    container_name: discovery-service
+    ports:
+      - "8761:8761"
 
 
 

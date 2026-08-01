@@ -3,6 +3,7 @@
   <component name="ExternalStorageConfigurationManager" enabled="true" />
   <component name="FrameworkDetectionExcludesConfiguration">
     <file type="web" url="file://$PROJECT_DIR$/achievement-service" />
+    <file type="web" url="file://$PROJECT_DIR$/discovery-service" />
     <file type="web" url="file://$PROJECT_DIR$/notification-service" />
     <file type="web" url="file://$PROJECT_DIR$/quiz-service" />
     <file type="web" url="file://$PROJECT_DIR$/user-service" />

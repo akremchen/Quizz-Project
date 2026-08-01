@@ -6,10 +6,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 
 import java.util.List;
 
-@FeignClient(
-        name = "user-service",
-        url = "http://user-service:8085"
-)
+@FeignClient(name = "user-service")
+
 public interface UserClient {
 
     @GetMapping("/api/users/favorite-categories/{category}/users")
