@@ -52,6 +52,8 @@ services:
     depends_on:
       - quiz-db
       - kafka
+      - discovery-service
+      - config-service
     ports:
       - "8082:8082"
     environment:
@@ -110,6 +112,8 @@ services:
     depends_on:
       - achievement-db
       - kafka
+      - discovery-service
+      - config-service
     ports:
       - "8083:8083"
     environment:
@@ -139,6 +143,8 @@ services:
     depends_on:
       - notification-db
       - kafka
+      - discovery-service
+      - config-service
     ports:
       - "8084:8084"
     environment:
@@ -154,7 +160,18 @@ services:
     ports:
       - "8761:8761"
 
-
+  config-service:
+    build:
+      context: ./config-service
+      dockerfile: Dockerfile
+    container_name: config-service
+    ports:
+      - "8888:8888"
+    volumes:
+      - ./config-repository:/config-repository:ro
+    depends_on:
+      - discovery-service
+    restart: unless-stopped
 
 volumes:
   quiz-db-data:
