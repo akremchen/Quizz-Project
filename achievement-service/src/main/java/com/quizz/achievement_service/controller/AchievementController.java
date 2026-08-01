@@ -53,4 +53,14 @@ public class AchievementController {
                 achievementService.getUserBadges(userId)
         );
     }
+
+    @PostMapping("/users/{userId}/deduct-points")
+    public ResponseEntity<Void> deductPoints(
+            @PathVariable Long userId,
+            @RequestParam int points
+    ) {
+        achievementService.deductPoints(userId, points);
+
+        return ResponseEntity.noContent().build();
+    }
 }

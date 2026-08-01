@@ -139,4 +139,31 @@ public class AchievementService {
             awardBadgeIfNotExists(userId, "Golden Streak");
         }
     }
+
+    public void deductPoints(Long userId, int points) {
+        if (points <= 0) {
+            throw new BadRequestException(
+                    "Points to deduct must be greater than 0"
+            );
+        }
+
+        UserPoints userPoints = pointsRepository.findByUserId(userId)
+                .orElseThrow(() ->
+                        new BadRequestException(
+                                "User has no points balance"
+                        )
+                );
+
+        if (userPoints.getPoints() < points) {
+            throw new BadRequestException(
+                    "Not enough points to unlock this quiz"
+            );
+        }
+
+        userPoints.setPoints(
+                userPoints.getPoints() - points
+        );
+
+        pointsRepository.save(userPoints);
+    }
 }

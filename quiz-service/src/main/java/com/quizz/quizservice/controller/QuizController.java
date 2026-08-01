@@ -31,8 +31,19 @@ public class QuizController {
     ) {
         Long userId = (Long) authentication.getDetails();
 
-        return quizService.createQuiz(request, userId);
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN")
+                );
+
+        return quizService.createQuiz(
+                request,
+                userId,
+                isAdmin
+        );
     }
+
     @GetMapping
     public List<QuizResponse> findAllQuizzes() {
         return quizService.findAllQuizzes();
@@ -81,7 +92,18 @@ public class QuizController {
     ) {
         Long userId = (Long) authentication.getDetails();
 
-        return quizService.updateQuiz(id, userId, request);
+        boolean isAdmin = authentication.getAuthorities()
+                .stream()
+                .anyMatch(authority ->
+                        authority.getAuthority().equals("ROLE_ADMIN")
+                );
+
+        return quizService.updateQuiz(
+                id,
+                userId,
+                isAdmin,
+                request
+        );
     }
 
     @DeleteMapping("/{id}")

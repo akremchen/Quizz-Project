@@ -15,6 +15,8 @@ public class QuizResponse {
     private String description;
     private String category;
     private Boolean published;
+    private boolean premium;
+    private Integer unlockPoints;
 
     private List<QuestionResponse> questions;
 }

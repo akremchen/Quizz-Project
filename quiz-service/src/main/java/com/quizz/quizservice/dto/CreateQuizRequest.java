@@ -20,6 +20,10 @@ public class CreateQuizRequest {
     @NotBlank
     private String category;
 
+    private boolean premium;
+
+    private Integer unlockPoints;
+    
     @NotEmpty
     private List<QuestionRequest> questions;
 

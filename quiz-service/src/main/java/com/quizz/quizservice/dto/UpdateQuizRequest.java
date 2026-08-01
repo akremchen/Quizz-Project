@@ -20,6 +20,10 @@ public class UpdateQuizRequest {
     @NotBlank(message = "Category is required")
     private String category;
 
+    private boolean premium;
+
+    private Integer unlockPoints;
+
     @NotEmpty(message = "Questions cannot be empty")
     @Valid
     private List<QuestionRequest> questions;

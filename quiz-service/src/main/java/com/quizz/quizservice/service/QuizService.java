@@ -1,6 +1,6 @@
 package com.quizz.quizservice.service;
 
-import com.quizz.quizservice.client.UserClient;
+import com.quizz.quizservice.client.AchievementClient;
 import com.quizz.quizservice.dto.SubmitQuizRequest;
 import com.quizz.quizservice.dto.UpdateQuizRequest;
 import com.quizz.quizservice.dto.response.AnswerOptionResponse;
@@ -34,34 +34,63 @@ public class QuizService {
     private final QuizAttemptRepository quizAttemptRepository;
     private final QuizEventProducer quizEventProducer;
     private final UserUnlockedQuizRepository userUnlockedQuizRepository;
-    private final UserClient userClient;
+    private final AchievementClient achievementClient;
 
     @Transactional
     public void unlockQuiz(Long quizId, Long userId) {
         Quiz quiz = quizRepository.findById(quizId)
-                .orElseThrow(() -> new ResourceNotFoundException("Quiz not found"));
+                .orElseThrow(() ->
+                        new ResourceNotFoundException("Quiz not found")
+                );
 
         if (!quiz.isPremium()) {
-            throw new BadRequestException("This quiz is not a premium locked quiz");
+            throw new BadRequestException(
+                    "This quiz is not a premium locked quiz"
+            );
         }
 
-        boolean alreadyUnlocked = userUnlockedQuizRepository.existsByUserIdAndQuizId(userId, quizId);
-        if (alreadyUnlocked) {
-            throw new BadRequestException("You have already unlocked this quiz");
+        if (!Boolean.TRUE.equals(quiz.getPublished())) {
+            throw new BadRequestException(
+                    "Only published quizzes can be unlocked"
+            );
         }
 
-        userClient.deductPoints(userId, 50);
+        if (userUnlockedQuizRepository
+                .existsByUserIdAndQuizId(userId, quizId)) {
+            throw new BadRequestException(
+                    "You have already unlocked this quiz"
+            );
+        }
 
-        UserUnlockedQuiz unlockedQuiz = UserUnlockedQuiz.builder()
-                .userId(userId)
-                .quizId(quizId)
-                .unlockedAt(LocalDateTime.now())
-                .build();
+        achievementClient.deductPoints(
+                userId,
+                quiz.getUnlockPoints()
+        );
+
+        UserUnlockedQuiz unlockedQuiz =
+                UserUnlockedQuiz.builder()
+                        .userId(userId)
+                        .quizId(quizId)
+                        .unlockedAt(LocalDateTime.now())
+                        .build();
 
         userUnlockedQuizRepository.save(unlockedQuiz);
     }
+    public Quiz createQuiz( CreateQuizRequest request, Long ownerId, boolean isAdmin ) {
 
-    public Quiz createQuiz( CreateQuizRequest request, Long ownerId ) {
+        if (request.isPremium() && !isAdmin) {
+            throw new BadRequestException(
+                    "Only administrators can create premium quizzes"
+            );
+        }
+
+        if (request.isPremium() &&
+                (request.getUnlockPoints() == null
+                        || request.getUnlockPoints() <= 0)) {
+            throw new BadRequestException(
+                    "Premium quizzes must have a positive unlock point value"
+            );
+        }
 
         Quiz quiz = Quiz.builder()
                 .ownerId(ownerId)
@@ -70,6 +99,12 @@ public class QuizService {
                 .description(request.getDescription())
                 .published(false)
                 .createdAt(LocalDateTime.now())
+                .isPremium(request.isPremium())
+                .unlockPoints(
+                        request.isPremium()
+                                ? request.getUnlockPoints()
+                                : 0
+                )
                 .build();
 
         List<Question> questions = request.getQuestions().stream()
@@ -105,6 +140,8 @@ public class QuizService {
                 .title(quiz.getTitle())
                 .description(quiz.getDescription())
                 .category(quiz.getCategory())
+                .premium(quiz.isPremium())
+                .unlockPoints(quiz.getUnlockPoints())
                 .published(quiz.getPublished())
                 .questions(
                         quiz.getQuestions().stream()
@@ -168,6 +205,14 @@ public class QuizService {
             throw new BadRequestException("Quiz must be published before it can be submitted");
         }
 
+        if (quiz.isPremium() &&
+                !userUnlockedQuizRepository
+                        .existsByUserIdAndQuizId(userId, quizId)) {
+            throw new BadRequestException(
+                    "You must unlock this premium quiz first"
+            );
+        }
+
         int correctAnswers = 0;
 
         for (SubmitQuizRequest.QuestionAnswerRequest submittedAnswer  : request.getAnswers()) {
@@ -211,13 +256,27 @@ public class QuizService {
         return result;
     }
 
-    public QuizResponse updateQuiz(Long quizId, Long ownerId, UpdateQuizRequest request) {
+    public QuizResponse updateQuiz(Long quizId, Long ownerId, boolean isAdmin, UpdateQuizRequest request) {
         Quiz quiz = quizRepository.findById(quizId)
                 .orElseThrow(() ->
                         new ResourceNotFoundException("Quiz not found with id: " + quizId));
 
-        if (!quiz.getOwnerId().equals(ownerId)) {
+        if (!quiz.getOwnerId().equals(ownerId) && !isAdmin) {
             throw new BadRequestException("Only the quiz owner can update this quiz");
+        }
+
+        if (request.isPremium() && !isAdmin) {
+            throw new BadRequestException(
+                    "Only administrators can make a quiz premium"
+            );
+        }
+
+        if (request.isPremium() &&
+                (request.getUnlockPoints() == null
+                        || request.getUnlockPoints() <= 0)) {
+            throw new BadRequestException(
+                    "Premium quizzes must have a positive unlock point value"
+            );
         }
 
         quiz.setTitle(request.getTitle());
@@ -247,6 +306,14 @@ public class QuizService {
                 .toList();
 
         quiz.getQuestions().addAll(updatedQuestions);
+
+        quiz.setPremium(request.isPremium());
+
+        quiz.setUnlockPoints(
+                request.isPremium()
+                        ? request.getUnlockPoints()
+                        : 0
+        );
 
         Quiz savedQuiz = quizRepository.save(quiz);
 
