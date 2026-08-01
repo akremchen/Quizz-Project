@@ -1,9 +1,8 @@
 export const emptyQuiz = {
+    ownerId: 1,
     title: '',
     description: '',
     category: '',
-    premium: false,
-    unlockPoints: 10,
     questions: [
         {
             question: '',
@@ -17,25 +16,24 @@ export const emptyQuiz = {
 
 export function quizToForm(quiz) {
     return {
+        ownerId: quiz.ownerId || 1,
         title: quiz.title || '',
         description: quiz.description || '',
         category: quiz.category || '',
-        premium: Boolean(quiz.premium),
-        unlockPoints: quiz.unlockPoints || 10,
         questions: (quiz.questions || []).map((q) => ({
             question: q.question || '',
             options: (q.options || []).map((o, index) => ({
                 answer: o.answer || '',
-                correct: Boolean(o.correct ?? index === 0),
+                correct: index === 0,
             })),
         })),
     }
 }
 
 export function validateQuizForm(form) {
+    if (!form.ownerId) return 'Owner ID is required'
     if (!form.title.trim()) return 'Title is required'
     if (!form.category.trim()) return 'Category is required'
-    if (form.premium && (!form.unlockPoints || Number(form.unlockPoints) < 1)) return 'Premium quizzes need a positive unlock cost'
     if (!form.questions.length) return 'At least one question is required'
 
     for (const [qIndex, question] of form.questions.entries()) {

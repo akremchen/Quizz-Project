@@ -98,7 +98,7 @@ public class UserController {
     }
 
     @PutMapping("/me")
-    public ResponseEntity<UserResponse> updateMyProfile(
+    public ResponseEntity<LoginResponse> updateMyProfile(
             @RequestBody UpdateProfileRequest request,
             Authentication authentication
     ) {
@@ -109,7 +109,14 @@ public class UserController {
                 request
         );
 
-        return ResponseEntity.ok(toResponse(updatedUser));
+        String newToken = jwtService.generateToken(updatedUser);
+
+        return ResponseEntity.ok(
+                new LoginResponse(
+                        newToken,
+                        toResponse(updatedUser)
+                )
+        );
     }
 
     @PatchMapping("/me/password")

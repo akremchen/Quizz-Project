@@ -1,5 +1,8 @@
 import { Plus, Save, Trash2 } from 'lucide-react'
-export default function QuizForm({ form, setForm, mode = 'create', onSubmit, loading, isAdmin }) {
+import { quizApi } from "../api/quizApi.js";
+
+
+export default function QuizForm({ form, setForm, mode = 'create', onSubmit, loading }) {
     const updateField = (field, value) => setForm((prev) => ({ ...prev, [field]: value }))
 
     const updateQuestion = (questionIndex, field, value) => {
@@ -68,6 +71,10 @@ export default function QuizForm({ form, setForm, mode = 'create', onSubmit, loa
         <form className="quiz-form" onSubmit={onSubmit}>
             <div className="form-grid">
                 <label>
+                    Owner ID
+                    <input type="number" min="1" value={form.ownerId} onChange={(e) => updateField('ownerId', Number(e.target.value))} />
+                </label>
+                <label>
                     Category
                     <input value={form.category} onChange={(e) => updateField('category', e.target.value)} placeholder="Java, Spring, Math..." />
                 </label>
@@ -77,21 +84,6 @@ export default function QuizForm({ form, setForm, mode = 'create', onSubmit, loa
                 Title
                 <input value={form.title} onChange={(e) => updateField('title', e.target.value)} placeholder="Quiz title" />
             </label>
-
-            {isAdmin && (
-                <div className="premium-fields">
-                    <label className="checkbox-label">
-                        <input type="checkbox" checked={form.premium} onChange={(e) => updateField('premium', e.target.checked)} />
-                        Premium quiz
-                    </label>
-                    {form.premium && (
-                        <label>
-                            Unlock cost
-                            <input type="number" min="1" value={form.unlockPoints} onChange={(e) => updateField('unlockPoints', Number(e.target.value))} />
-                        </label>
-                    )}
-                </div>
-            )}
 
             <label>
                 Description

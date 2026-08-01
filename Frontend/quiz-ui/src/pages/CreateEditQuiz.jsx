@@ -2,72 +2,37 @@ import { useEffect, useState } from 'react'
 import QuizForm from '../components/QuizForm.jsx'
 import { getApiError, quizApi } from '../api/quizApi.js'
 import { emptyQuiz, quizToForm, validateQuizForm } from '../utils/quizForm.js'
+import { useAuth } from '../context/AuthContext.jsx'
 
 export default function CreateEditQuiz({ mode, quizId, navigate, setToast }) {
-    const [form, setForm] = useState(emptyQuiz)
+    const { isAdmin } = useAuth()
+    const [form, setForm] = useState(() => ({ ...emptyQuiz }))
     const [loading, setLoading] = useState(false)
 
     useEffect(() => {
         if (mode !== 'edit') return
-        const loadQuiz = async () => {
-            try {
-                setLoading(true)
-                const quiz = await quizApi.getById(quizId)
-                setForm(quizToForm(quiz))
-            } catch (error) {
-                setToast({ type: 'error', message: getApiError(error) })
-            } finally {
-                setLoading(false)
-            }
-        }
-        loadQuiz()
+        setLoading(true)
+        quizApi.getById(quizId).then((quiz) => setForm(quizToForm(quiz))).catch((error) => setToast({ type: 'error', message: getApiError(error) })).finally(() => setLoading(false))
     }, [mode, quizId, setToast])
 
     const submit = async (event) => {
         event.preventDefault()
         const validationError = validateQuizForm(form)
-        if (validationError) {
-            setToast({ type: 'error', message: validationError })
-            return
-        }
-
+        if (validationError) return setToast({ type: 'error', message: validationError })
         const payload = {
-            title: form.title.trim(),
-            description: form.description.trim(),
-            category: form.category.trim(),
-            questions: form.questions.map((q) => ({
-                question: q.question.trim(),
-                options: q.options.map((o) => ({ answer: o.answer.trim(), correct: o.correct })),
-            })),
+            title: form.title.trim(), description: form.description.trim(), category: form.category.trim(),
+            premium: isAdmin ? Boolean(form.premium) : false,
+            unlockPoints: isAdmin && form.premium ? Number(form.unlockPoints) : null,
+            questions: form.questions.map((question) => ({ question: question.question.trim(), options: question.options.map((option) => ({ answer: option.answer.trim(), correct: option.correct })) })),
         }
-
         try {
             setLoading(true)
-            if (mode === 'edit') {
-                await quizApi.update(quizId, form.ownerId, payload)
-                setToast({ type: 'success', message: 'Quiz updated' })
-            } else {
-                await quizApi.create({ ...payload, ownerId: form.ownerId })
-                setToast({ type: 'success', message: 'Quiz created' })
-            }
+            if (mode === 'edit') await quizApi.update(quizId, payload)
+            else await quizApi.create(payload)
+            setToast({ type: 'success', message: mode === 'edit' ? 'Quiz updated' : 'Quiz created as a draft' })
             navigate('dashboard')
-        } catch (error) {
-            setToast({ type: 'error', message: getApiError(error) })
-        } finally {
-            setLoading(false)
-        }
+        } catch (error) { setToast({ type: 'error', message: getApiError(error) }) } finally { setLoading(false) }
     }
 
-    return (
-        <section className="panel">
-            <div className="page-heading">
-                <div>
-                    <span className="eyebrow">{mode === 'edit' ? 'Edit quiz' : 'Create quiz'}</span>
-                    <h1>{mode === 'edit' ? 'Update your quiz' : 'Create a new quiz'}</h1>
-                </div>
-                <button className="btn" onClick={() => navigate('dashboard')}>Back</button>
-            </div>
-            <QuizForm form={form} setForm={setForm} mode={mode} onSubmit={submit} loading={loading} />
-        </section>
-    )
+    return <section className="panel"><div className="page-heading"><div><span className="eyebrow">{mode === 'edit' ? 'Edit quiz' : 'Create quiz'}</span><h1>{mode === 'edit' ? 'Update your quiz' : 'Build a new challenge'}</h1><p>The signed-in account will be recorded as the owner.</p></div><button className="btn" onClick={() => navigate('dashboard')}>Back</button></div><QuizForm form={form} setForm={setForm} mode={mode} onSubmit={submit} loading={loading} isAdmin={isAdmin} /></section>
 }
