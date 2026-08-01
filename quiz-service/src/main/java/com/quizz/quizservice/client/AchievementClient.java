@@ -5,10 +5,8 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-@FeignClient(
-        name = "achievement-service",
-        url = "http://achievement-service:8083"
-)
+@FeignClient(name = "achievement-service")
+
 public interface AchievementClient {
 
     @PostMapping("/api/achievement/users/{userId}/deduct-points")

@@ -18,7 +18,7 @@ repositories {
 	mavenCentral()
 }
 
-extra["springCloudVersion"] = "2025.1.1"
+extra["springCloudVersion"] = "2025.1.2"
 
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -27,6 +27,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-kafka")
 	implementation("org.springframework.boot:spring-boot-starter-security")
 	implementation("org.springframework.boot:spring-boot-starter-json")
+	implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
 
 	implementation("io.jsonwebtoken:jjwt-api:0.13.0")
 	runtimeOnly("io.jsonwebtoken:jjwt-impl:0.13.0")

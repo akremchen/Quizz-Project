@@ -30,5 +30,15 @@ spring:
 server:
   port: 8084
 
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://discovery-service:8761/eureka/
+
+  instance:
+    prefer-ip-address: true
+
 jwt:
   secret: ${JWT_SECRET}
