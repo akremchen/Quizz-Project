@@ -47,6 +47,10 @@ public class SecurityConfig {
                         ).permitAll()
 
                         .requestMatchers(
+                                "/api/users/favorite-categories/*/users"
+                        ).permitAll()
+
+                        .requestMatchers(
                                 "/api/users/me",
                                 "/api/users/me/**"
                         ).authenticated()

@@ -3,6 +3,7 @@ package com.quizz.userservice.controller;
 import com.quizz.userservice.dto.*;
 import com.quizz.userservice.entity.User;
 import com.quizz.userservice.security.JwtService;
+import com.quizz.userservice.service.UserFavoriteCategoryService;
 import com.quizz.userservice.service.UserService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -17,14 +18,19 @@ public class UserController {
 
     private final UserService userService;
     private final JwtService jwtService;
+    private final UserFavoriteCategoryService favoriteCategoryService;
+
 
 
     public UserController(
             UserService userService,
-            JwtService jwtService
+            JwtService jwtService,
+            UserFavoriteCategoryService favoriteCategoryService
+
     ) {
         this.userService = userService;
         this.jwtService = jwtService;
+        this.favoriteCategoryService = favoriteCategoryService;
     }
 
     @PostMapping("/register")
@@ -114,6 +120,56 @@ public class UserController {
         String email = authentication.getName();
 
         userService.changePassword(email, request);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @PostMapping("/me/favorite-categories")
+    public ResponseEntity<Void> addFavoriteCategory(
+            @RequestBody FavoriteCategoryRequest request,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        favoriteCategoryService.addFavoriteCategory(
+                email,
+                request.category()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    @GetMapping("/me/favorite-categories")
+    public ResponseEntity<List<String>> getMyFavoriteCategories(
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        return ResponseEntity.ok(
+                favoriteCategoryService.getFavoriteCategories(email)
+        );
+    }
+
+    @GetMapping("/favorite-categories/{category}/users")
+    public ResponseEntity<List<Long>> getUsersByFavoriteCategory(
+            @PathVariable String category
+    ) {
+        return ResponseEntity.ok(
+                favoriteCategoryService.getUserIdsByCategory(category)
+        );
+    }
+
+    @DeleteMapping("/me/favorite-categories/{category}")
+    public ResponseEntity<Void> removeFavoriteCategory(
+            @PathVariable String category,
+            Authentication authentication
+    ) {
+        String email = authentication.getName();
+
+        favoriteCategoryService.removeFavoriteCategory(
+                email,
+                category
+        );
 
         return ResponseEntity.noContent().build();
     }

@@ -1,6 +1,7 @@
 package com.quizz.notification_service.kafka;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.quizz.notification_service.client.UserClient;
 import com.quizz.notification_service.entity.NotificationType;
 import com.quizz.notification_service.service.NotificationService;
 import lombok.RequiredArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
@@ -17,26 +19,53 @@ public class NotificationKafkaConsumer {
 
     private final NotificationService notificationService;
     private final ObjectMapper objectMapper;
+    private final UserClient userClient;
 
-    @KafkaListener(topics = "quiz-published", groupId = "notification-service-group")
+    @KafkaListener(
+            topics = "quiz-published",
+            groupId = "notification-service-group"
+    )
     public void handleQuizPublished(String message) {
         try {
-            Map<?, ?> payload = objectMapper.readValue(message, Map.class);
+            Map<?, ?> payload = objectMapper.readValue(
+                    message,
+                    Map.class
+            );
 
-            Long userId = Long.valueOf(payload.get("ownerId").toString());
+            Long ownerId = Long.valueOf(
+                    payload.get("ownerId").toString()
+            );
+
             String quizTitle = payload.get("title").toString();
             String category = payload.get("category").toString();
 
-            notificationService.createNotification(
-                    userId,
-                    "New Quiz Published",
-                    "A new quiz has been published in " + category + ": " + quizTitle,
-                    NotificationType.QUIZ_PUBLISHED
+            List<Long> interestedUserIds =
+                    userClient.getUserIdsByFavoriteCategory(category);
+
+            interestedUserIds.stream()
+                    .filter(userId -> !userId.equals(ownerId))
+                    .forEach(userId ->
+                            notificationService.createNotification(
+                                    userId,
+                                    "New Quiz in " + category,
+                                    "A new quiz was published in one of your favorite categories: "
+                                            + quizTitle,
+                                    NotificationType.QUIZ_PUBLISHED
+                            )
+                    );
+
+            log.info(
+                    "Created favorite-category notifications for {} users for quiz '{}'",
+                    interestedUserIds.size(),
+                    quizTitle
             );
 
-            log.info("Handled quiz-published event for user {}", userId);
-        } catch (Exception e) {
-            log.error("Failed to process quiz-published message: {}", message, e);
+        } catch (Exception exception) {
+            log.error(
+                    "Failed to process quiz-published message: {}",
+                    message,
+                    exception
+            );
         }
     }
 

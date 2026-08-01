@@ -17,11 +17,16 @@ repositories {
 	mavenCentral()
 }
 
+extra["springCloudVersion"] = "2024.0.3"
+
+
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-security")
+	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 
 	implementation("org.springframework.kafka:spring-kafka")
 
@@ -37,6 +42,14 @@ dependencies {
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
 	testImplementation("org.springframework.kafka:spring-kafka-test")
 	testRuntimeOnly("org.junit.platform:junit-platform-launcher")
+}
+
+dependencyManagement {
+	imports {
+		mavenBom(
+			"org.springframework.cloud:spring-cloud-dependencies:${property("springCloudVersion")}"
+		)
+	}
 }
 
 tasks.withType<Test> {
